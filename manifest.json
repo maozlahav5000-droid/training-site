@@ -1,0 +1,20 @@
+{
+    "name": "תוכנית אימונים",
+    "short_name": "אימונים",
+    "description": "תוכנית אימונים - 4 ימים בשבוע",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#0a0a0f",
+    "theme_color": "#4361ee",
+    "orientation": "portrait",
+    "lang": "he",
+    "dir": "rtl",
+    "icons": [
+        {
+            "src": "icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}
