@@ -16,6 +16,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
+            font-size: 18px;
             --bg-primary: #0a0a0f;
             --bg-secondary: #12121a;
             --bg-card: #1a1a2e;
@@ -65,21 +66,28 @@
 
         header { text-align: center; padding: 40px 0 30px; }
         header h1 {
-            font-size: 2.2rem; font-weight: 800;
+            font-size: 2.4rem; font-weight: 800;
             background: var(--gradient-1);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
             margin-bottom: 8px;
         }
-        header p { color: var(--text-secondary); font-size: 1rem; font-weight: 300; }
+        header p { color: var(--text-secondary); font-size: 1.1rem; font-weight: 300; }
 
         .tip-banner {
             background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: var(--radius-md); padding: 16px 20px; margin-bottom: 30px;
-            display: flex; gap: 12px; align-items: flex-start;
+            border-radius: var(--radius-md); padding: 18px 22px; margin-bottom: 30px;
+            display: flex; gap: 14px; align-items: flex-start;
         }
-        .tip-banner .icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
-        .tip-banner .tip-text { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; }
-        .tip-banner .tip-text strong { color: var(--accent-cyan); font-weight: 600; }
+        .tip-banner .icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; }
+        .tip-banner .general-notes-input {
+            flex: 1; background: transparent; border: none;
+            color: var(--text-secondary); font-family: 'Heebo', sans-serif;
+            font-size: 1rem; line-height: 1.75; resize: none;
+            min-height: 60px; max-height: 280px; overflow-y: auto;
+        }
+        .tip-banner .general-notes-input:focus { outline: none; color: var(--text-primary); }
+        .tip-banner .general-notes-input::placeholder { color: var(--text-muted); }
+        .tip-banner .general-notes-input strong { color: var(--accent-cyan); font-weight: 600; }
 
         .tabs {
             display: flex; gap: 6px; margin-bottom: 24px;
@@ -87,9 +95,9 @@
             padding: 6px; border: 1px solid var(--border-color); overflow-x: auto;
         }
         .tab-btn {
-            flex: 1; padding: 12px 8px; border: none; background: transparent;
+            flex: 1; padding: 14px 10px; border: none; background: transparent;
             color: var(--text-muted); font-family: 'Heebo', sans-serif;
-            font-size: 0.85rem; font-weight: 500; cursor: pointer;
+            font-size: 0.95rem; font-weight: 500; cursor: pointer;
             border-radius: var(--radius-md); transition: all 0.3s ease;
             white-space: nowrap;
         }
@@ -105,8 +113,8 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
         .day-header { margin-bottom: 20px; }
-        .day-header h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
-        .day-header .subtitle { color: var(--text-muted); font-size: 0.9rem; }
+        .day-header h2 { font-size: 1.65rem; font-weight: 700; margin-bottom: 4px; }
+        .day-header .subtitle { color: var(--text-muted); font-size: 1rem; }
 
         .exercise-card {
             background: var(--bg-card); border: 1px solid var(--border-color);
@@ -122,18 +130,18 @@
         .exercise-header .right-side { display: flex; align-items: center; gap: 12px; flex: 1; }
 
         .exercise-number {
-            width: 32px; height: 32px; border-radius: 50%;
+            width: 36px; height: 36px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 0.8rem; font-weight: 700; color: #fff; flex-shrink: 0;
+            font-size: 0.95rem; font-weight: 700; color: #fff; flex-shrink: 0;
         }
         [data-day="A"] .exercise-number { background: var(--gradient-1); }
         [data-day="B"] .exercise-number { background: var(--gradient-2); }
         [data-day="C"] .exercise-number { background: var(--gradient-3); }
         [data-day="D"] .exercise-number { background: var(--gradient-4); }
 
-        .exercise-name { font-weight: 600; font-size: 1rem; }
+        .exercise-name { font-weight: 600; font-size: 1.1rem; }
         .exercise-name-input {
-            font-weight: 600; font-size: 1rem; background: transparent;
+            font-weight: 600; font-size: 1.1rem; background: transparent;
             border: none; border-bottom: 1px dashed var(--border-color);
             color: var(--text-primary); font-family: 'Heebo', sans-serif;
             width: 100%; padding: 2px 0;
@@ -141,8 +149,8 @@
         .exercise-name-input:focus { outline: none; border-bottom-color: var(--accent-blue); }
 
         .exercise-sets-badge {
-            background: rgba(255,255,255,0.06); padding: 4px 12px;
-            border-radius: 20px; font-size: 0.8rem; color: var(--text-secondary);
+            background: rgba(255,255,255,0.06); padding: 5px 14px;
+            border-radius: 20px; font-size: 0.9rem; color: var(--text-secondary);
             font-weight: 500; white-space: nowrap; flex-shrink: 0;
         }
 
@@ -165,13 +173,13 @@
             border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.04);
         }
 
-        .set-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; min-width: 40px; }
+        .set-label { font-size: 0.9rem; color: var(--text-muted); font-weight: 600; min-width: 40px; }
 
         .num-input {
             width: 48px; padding: 5px 6px; background: var(--bg-primary);
             border: 1px solid var(--border-color); border-radius: var(--radius-sm);
             font-family: 'Heebo', sans-serif;
-            font-size: 0.9rem; text-align: center; direction: ltr;
+            font-size: 1rem; text-align: center; direction: ltr;
             font-weight: 700;
         }
         .num-input:focus { outline: none; box-shadow: 0 0 0 3px rgba(0,212,255,0.12); }
@@ -179,19 +187,19 @@
         .sets-num:focus { border-color: var(--accent-cyan); }
         .reps-num { color: var(--accent-orange); border-color: var(--border-color); }
         .reps-num:focus { border-color: var(--accent-orange); }
-        .sets-x { font-size: 1.1rem; font-weight: 800; color: var(--text-muted); }
-        .reps-label { font-size: 0.78rem; color: var(--text-muted); }
+        .sets-x { font-size: 1.2rem; font-weight: 800; color: var(--text-muted); }
+        .reps-label { font-size: 0.88rem; color: var(--text-muted); }
 
         .weight-input-wrapper { display: flex; align-items: center; gap: 6px; margin-right: auto; }
         .weight-input {
             width: 70px; padding: 6px 10px; background: var(--bg-primary);
             border: 1px solid var(--border-color); border-radius: var(--radius-sm);
             color: var(--text-primary); font-family: 'Heebo', sans-serif;
-            font-size: 0.85rem; text-align: center; direction: ltr;
+            font-size: 0.95rem; text-align: center; direction: ltr;
         }
         .weight-input:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(67,97,238,0.15); }
-        .weight-input::placeholder { color: var(--text-muted); font-size: 0.75rem; }
-        .weight-unit { font-size: 0.75rem; color: var(--text-muted); }
+        .weight-input::placeholder { color: var(--text-muted); font-size: 0.85rem; }
+        .weight-unit { font-size: 0.85rem; color: var(--text-muted); }
 
         .completed-check {
             width: 24px; height: 24px; border-radius: 50%;
@@ -212,16 +220,16 @@
 
         .add-set-btn {
             display: flex; align-items: center; justify-content: center; gap: 6px;
-            width: 100%; padding: 8px; border: 1px dashed var(--border-color);
+            width: 100%; padding: 10px; border: 1px dashed var(--border-color);
             border-radius: var(--radius-sm); background: transparent;
             color: var(--text-muted); font-family: 'Heebo', sans-serif;
-            font-size: 0.82rem; cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.92rem; cursor: pointer; transition: all 0.2s ease;
         }
         .add-set-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); background: rgba(67,97,238,0.05); }
 
         .notes-section { margin-top: 12px; }
         .notes-title {
-            font-size: 0.78rem; font-weight: 600; color: var(--accent-cyan);
+            font-size: 0.9rem; font-weight: 600; color: var(--accent-cyan);
             margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
         }
 
@@ -234,7 +242,7 @@
         .note-text-input {
             flex: 1; background: transparent; border: none;
             color: var(--text-secondary); font-family: 'Heebo', sans-serif;
-            font-size: 0.82rem; line-height: 1.6;
+            font-size: 0.92rem; line-height: 1.6;
         }
         .note-text-input:focus { outline: none; color: var(--text-primary); }
         .note-text-input::placeholder { color: var(--text-muted); }
@@ -250,10 +258,10 @@
 
         .add-note-btn {
             display: flex; align-items: center; gap: 6px;
-            padding: 6px 12px; border: 1px dashed rgba(0,212,255,0.3);
+            padding: 8px 14px; border: 1px dashed rgba(0,212,255,0.3);
             border-radius: var(--radius-sm); background: transparent;
             color: var(--text-muted); font-family: 'Heebo', sans-serif;
-            font-size: 0.78rem; cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.88rem; cursor: pointer; transition: all 0.2s ease;
             margin-top: 4px;
         }
         .add-note-btn:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); background: rgba(0,212,255,0.05); }
@@ -261,8 +269,8 @@
         .actions-bar { display: flex; gap: 10px; margin-top: 30px; margin-bottom: 40px; flex-wrap: wrap; }
 
         .btn {
-            padding: 12px 24px; border: none; border-radius: var(--radius-md);
-            font-family: 'Heebo', sans-serif; font-size: 0.9rem; font-weight: 600;
+            padding: 14px 26px; border: none; border-radius: var(--radius-md);
+            font-family: 'Heebo', sans-serif; font-size: 1rem; font-weight: 600;
             cursor: pointer; transition: all 0.2s ease;
             display: flex; align-items: center; gap: 8px;
         }
@@ -288,7 +296,7 @@
             background: var(--bg-card); border: 1px solid var(--accent-green);
             color: var(--accent-green); padding: 12px 24px;
             border-radius: var(--radius-md); font-family: 'Heebo', sans-serif;
-            font-size: 0.9rem; font-weight: 500; box-shadow: var(--shadow-lg);
+            font-size: 1rem; font-weight: 500; box-shadow: var(--shadow-lg);
             transition: transform 0.3s ease; z-index: 1000;
             display: flex; align-items: center; gap: 8px;
         }
@@ -306,7 +314,7 @@
             max-width: 500px; width: 90%; max-height: 70vh; overflow-y: auto;
         }
         .history-modal h3 {
-            font-size: 1.2rem; margin-bottom: 16px;
+            font-size: 1.35rem; margin-bottom: 16px;
             display: flex; align-items: center; gap: 8px;
         }
         .history-entry {
@@ -314,22 +322,99 @@
             border-radius: var(--radius-sm); margin-bottom: 8px;
             border: 1px solid var(--border-color);
         }
-        .history-date { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 6px; }
-        .history-weights { font-size: 0.85rem; color: var(--text-secondary); }
+        .history-date { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 6px; }
+        .history-weights { font-size: 0.95rem; color: var(--text-secondary); }
         .close-modal {
             float: left; background: none; border: none;
             color: var(--text-muted); font-size: 1.4rem; cursor: pointer; padding: 0 4px;
         }
         .close-modal:hover { color: var(--text-primary); }
 
+        /* Timer trigger - below general notes, fits container */
+        .timer-trigger {
+            width: 100%; padding: 14px 20px; margin-bottom: 24px;
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); color: var(--text-primary);
+            font-family: 'Heebo', sans-serif; font-size: 1rem; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .timer-trigger:hover {
+            border-color: rgba(67,97,238,0.4); background: var(--bg-card-hover);
+        }
+        .timer-trigger svg { width: 22px; height: 22px; flex-shrink: 0; }
+        .timer-panel-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            z-index: 998; display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .timer-panel-overlay.show { display: flex; }
+        .timer-panel {
+            background: var(--bg-secondary); border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg); padding: 28px;
+            width: 90%; max-width: 340px; text-align: center;
+        }
+        .timer-panel h3 {
+            font-size: 1.2rem; margin-bottom: 20px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .timer-display {
+            font-size: 3.2rem; font-weight: 800; font-variant-numeric: tabular-nums;
+            color: var(--accent-cyan); margin-bottom: 20px; direction: ltr;
+        }
+        .timer-display.warning { color: var(--accent-orange); }
+        .timer-display.done { color: var(--accent-green); animation: pulse 0.5s ease; }
+        @keyframes pulse { 50% { opacity: 0.7; } }
+        .timer-controls { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+        .timer-presets {
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 16px;
+        }
+        .timer-preset-item {
+            display: inline-flex; align-items: center; gap: 2px;
+            background: rgba(255,255,255,0.04); border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm); overflow: hidden;
+        }
+        .timer-preset-btn {
+            padding: 8px 12px; border: none; background: transparent;
+            color: var(--text-secondary); font-family: 'Heebo', sans-serif;
+            font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease;
+        }
+        .timer-preset-btn:hover { color: var(--accent-cyan); }
+        .timer-preset-delete {
+            width: 26px; height: 100%; padding: 0; border: none; border-right: 1px solid var(--border-color);
+            background: rgba(255,82,82,0.08); color: var(--accent-red);
+            font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s ease;
+        }
+        .timer-preset-delete:hover { background: rgba(255,82,82,0.2); }
+        .timer-save-row {
+            display: flex; gap: 8px; align-items: center; justify-content: center;
+            margin-top: 16px; flex-wrap: wrap;
+        }
+        .timer-save-row input {
+            width: 70px; padding: 8px; background: var(--bg-primary);
+            border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+            color: var(--text-primary); font-family: 'Heebo', sans-serif;
+            font-size: 0.95rem; text-align: center; direction: ltr;
+        }
+        .timer-save-row input:focus { outline: none; border-color: var(--accent-cyan); }
+        .timer-save-row .timer-save-btn {
+            padding: 8px 16px; background: rgba(0,212,255,0.15);
+            border: 1px solid var(--accent-cyan); color: var(--accent-cyan);
+            border-radius: var(--radius-sm); font-family: 'Heebo', sans-serif;
+            font-size: 0.9rem; cursor: pointer;
+        }
+        .timer-save-row .timer-save-btn:hover { background: rgba(0,212,255,0.25); }
+
         @media (max-width: 600px) {
             .container { padding: 12px; }
             header { padding: 24px 0 20px; }
-            header h1 { font-size: 1.6rem; }
+            header h1 { font-size: 1.85rem; }
+            .timer-trigger { padding: 12px 16px; font-size: 0.95rem; margin-bottom: 20px; }
             .tabs { gap: 4px; padding: 4px; }
-            .tab-btn { padding: 10px 6px; font-size: 0.75rem; }
+            .tab-btn { padding: 10px 6px; font-size: 0.85rem; }
             .exercise-header { padding: 12px 14px; }
-            .exercise-name { font-size: 0.9rem; }
+            .exercise-name { font-size: 1rem; }
             .set-row { flex-wrap: wrap; gap: 8px; }
             .btn { flex: 1; justify-content: center; min-width: 120px; }
         }
@@ -344,10 +429,14 @@
 
         <div class="tip-banner">
             <span class="icon">💡</span>
-            <div class="tip-text">
-                <strong>כלל ההתקדמות:</strong> תראה מה עשית בפעם הקודמת ותנסה להתקדם — בעוד חזרה אחת או בעוד חצי ק"ג משקל עבודה. לא לשכוח כמה סטים חימום לפני משקל העבודה!
-            </div>
+            <textarea id="general-notes-input" class="general-notes-input" placeholder="הערות כלליות (למשל כלל התקדמות, תזכורות)..."
+                onchange="saveGeneralNotes(this.value)" onblur="saveGeneralNotes(this.value)" oninput="resizeGeneralNotes(this)"></textarea>
         </div>
+
+        <button type="button" class="timer-trigger" onclick="toggleTimerPanel()" title="טיימר" aria-label="טיימר">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            טיימר
+        </button>
 
         <div class="tabs">
             <button class="tab-btn active" data-day="A" onclick="switchTab('A')">יום A<br><small>חזה, כתפיים, יד אחורית</small></button>
@@ -404,6 +493,27 @@
                 היסטוריית משקלים
             </h3>
             <div id="history-content"></div>
+        </div>
+    </div>
+
+    <div class="timer-panel-overlay" id="timer-panel" onclick="closeTimerPanel(event)">
+        <div class="timer-panel">
+            <h3>
+                <button class="close-modal" onclick="closeTimerPanel(null)">✕</button>
+                טיימר
+            </h3>
+            <div class="timer-display" id="timer-display">1:30</div>
+            <div class="timer-controls">
+                <button class="btn btn-primary" id="timer-start-btn" onclick="timerStartPause()">התחל</button>
+                <button class="btn btn-secondary" onclick="timerReset()">איפוס</button>
+            </div>
+            <div class="timer-presets" id="timer-presets"></div>
+            <div class="timer-save-row">
+                <input type="number" id="timer-custom-sec" min="0" max="59" placeholder="שנ'" value="30">
+                <span>:</span>
+                <input type="number" id="timer-custom-min" min="0" max="99" placeholder="דק'" value="1">
+                <button class="timer-save-btn" onclick="timerSavePreset()">שמור כטיימר</button>
+            </div>
         </div>
     </div>
 
@@ -578,6 +688,11 @@ const defaultWorkoutData = {
 const PROGRAM_KEY = 'workout_program_v2';
 const WEIGHTS_KEY = 'training_weights_v2';
 const HISTORY_KEY = 'training_history';
+const GENERAL_NOTES_KEY = 'training_general_notes';
+const TIMER_PRESETS_KEY = 'timer_presets';
+
+const DEFAULT_GENERAL_NOTES = 'כלל ההתקדמות: תראה מה עשית בפעם הקודמת ותנסה להתקדם — בעוד חזרה אחת או בעוד חצי ק"ג משקל עבודה. לא לשכוח כמה סטים חימום לפני משקל העבודה!';
+const DEFAULT_TIMER_PRESETS = [90, 120, 180];
 
 function getProgram() {
     try {
@@ -601,6 +716,39 @@ function saveWeightsData(w) {
 
 function getHistory() {
     try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch { return []; }
+}
+
+function getGeneralNotes() {
+    try {
+        const s = localStorage.getItem(GENERAL_NOTES_KEY);
+        return s !== null ? s : DEFAULT_GENERAL_NOTES;
+    } catch { return DEFAULT_GENERAL_NOTES; }
+}
+
+function saveGeneralNotes(text) {
+    try { localStorage.setItem(GENERAL_NOTES_KEY, text); } catch (_) {}
+}
+
+function resizeGeneralNotes(ta) {
+    if (!ta) ta = document.getElementById('general-notes-input');
+    if (!ta) return;
+    ta.style.height = 'auto';
+    var max = 280;
+    var h = Math.min(max, Math.max(60, ta.scrollHeight));
+    ta.style.height = h + 'px';
+    ta.style.overflowY = h >= max ? 'auto' : 'hidden';
+}
+
+function getTimerPresets() {
+    try {
+        const s = localStorage.getItem(TIMER_PRESETS_KEY);
+        if (s) { const arr = JSON.parse(s); if (Array.isArray(arr) && arr.length) return arr; }
+    } catch {}
+    return [...DEFAULT_TIMER_PRESETS];
+}
+
+function saveTimerPresets(presets) {
+    localStorage.setItem(TIMER_PRESETS_KEY, JSON.stringify(presets));
 }
 
 function weightId(dayKey, exIdx, grpIdx) {
@@ -889,11 +1037,126 @@ function closeHistory(event) {
     if (event.target === event.currentTarget) event.currentTarget.classList.remove('show');
 }
 
+// ——— Timer ———
+let timerRemaining = 90;
+let timerInterval = null;
+
+function formatTimer(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+function updateTimerDisplay() {
+    const el = document.getElementById('timer-display');
+    if (!el) return;
+    el.textContent = formatTimer(timerRemaining);
+    el.classList.remove('warning', 'done');
+    if (timerRemaining <= 10 && timerRemaining > 0) el.classList.add('warning');
+    if (timerRemaining === 0) el.classList.add('done');
+}
+
+function timerTick() {
+    if (timerRemaining <= 0) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        document.getElementById('timer-start-btn').textContent = 'התחל';
+        return;
+    }
+    timerRemaining--;
+    updateTimerDisplay();
+}
+
+function timerStartPause() {
+    const btn = document.getElementById('timer-start-btn');
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        btn.textContent = 'המשך';
+    } else {
+        if (timerRemaining <= 0) timerRemaining = 90;
+        btn.textContent = 'השהה';
+        timerInterval = setInterval(timerTick, 1000);
+    }
+    updateTimerDisplay();
+}
+
+function timerReset() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    const presets = getTimerPresets();
+    timerRemaining = presets[0] || 90;
+    document.getElementById('timer-start-btn').textContent = 'התחל';
+    updateTimerDisplay();
+}
+
+function timerSet(seconds) {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    timerRemaining = Math.max(0, parseInt(seconds) || 0);
+    document.getElementById('timer-start-btn').textContent = 'התחל';
+    updateTimerDisplay();
+}
+
+function timerSavePreset() {
+    const min = parseInt(document.getElementById('timer-custom-min').value) || 0;
+    const sec = parseInt(document.getElementById('timer-custom-sec').value) || 0;
+    const total = min * 60 + sec;
+    if (total <= 0) { showToast('הזן זמן תקין'); return; }
+    const presets = getTimerPresets();
+    if (presets.includes(total)) { showToast('הזמן כבר שמור'); return; }
+    presets.push(total);
+    presets.sort((a, b) => a - b);
+    saveTimerPresets(presets);
+    renderTimerPresets();
+    showToast('הטיימר נשמר');
+}
+
+function timerDeletePreset(sec, event) {
+    if (event) event.stopPropagation();
+    let presets = getTimerPresets().filter(s => s !== sec);
+    if (presets.length === 0) presets = [...DEFAULT_TIMER_PRESETS];
+    saveTimerPresets(presets);
+    renderTimerPresets();
+    updateTimerDisplay();
+    showToast('הטיימר הוסר');
+}
+
+function renderTimerPresets() {
+    const container = document.getElementById('timer-presets');
+    if (!container) return;
+    const presets = getTimerPresets();
+    container.innerHTML = presets.map(sec => {
+        const label = sec < 60 ? sec + ' שנ\'' : Math.floor(sec / 60) + ':' + (sec % 60 < 10 ? '0' : '') + (sec % 60);
+        return `<span class="timer-preset-item">
+            <button class="timer-preset-btn" onclick="timerSet(${sec})">${label}</button>
+            <button type="button" class="timer-preset-delete" onclick="timerDeletePreset(${sec}, event)" title="מחק טיימר">✕</button>
+        </span>`;
+    }).join('');
+}
+
+function toggleTimerPanel() {
+    document.getElementById('timer-panel').classList.add('show');
+    renderTimerPresets();
+    updateTimerDisplay();
+}
+
+function closeTimerPanel(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('timer-panel').classList.remove('show');
+}
+
 function exportData() {
     const data = {
         program: getProgram(),
         weights: getWeights(),
         history: getHistory(),
+        generalNotes: getGeneralNotes(),
+        timerPresets: getTimerPresets(),
         exportDate: new Date().toLocaleString('he-IL')
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -919,7 +1182,12 @@ function importData(event) {
             if (data.program) localStorage.setItem(PROGRAM_KEY, JSON.stringify(data.program));
             if (data.weights) localStorage.setItem(WEIGHTS_KEY, JSON.stringify(data.weights));
             if (data.history) localStorage.setItem(HISTORY_KEY, JSON.stringify(data.history));
+            if (data.generalNotes != null) localStorage.setItem(GENERAL_NOTES_KEY, data.generalNotes);
+            if (data.timerPresets && Array.isArray(data.timerPresets)) saveTimerPresets(data.timerPresets);
             ['A','B','C','D'].forEach(renderDay);
+            var notesEl = document.getElementById('general-notes-input');
+            notesEl.value = getGeneralNotes();
+            resizeGeneralNotes(notesEl);
             showToast('הגיבוי יובא בהצלחה!');
         } catch {
             showToast('שגיאה בקריאת הקובץ');
@@ -933,7 +1201,12 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 
+var generalNotesEl = document.getElementById('general-notes-input');
+generalNotesEl.value = getGeneralNotes();
+resizeGeneralNotes(generalNotesEl);
 ['A','B','C','D'].forEach(renderDay);
+timerRemaining = getTimerPresets()[0] || 90;
+updateTimerDisplay();
 </script>
 </body>
 </html>
