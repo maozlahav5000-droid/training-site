@@ -199,7 +199,12 @@
         }
         .weight-input:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(67,97,238,0.15); }
         .weight-input::placeholder { color: var(--text-muted); font-size: 0.85rem; }
-        .weight-unit { font-size: 0.85rem; color: var(--text-muted); }
+        .weight-unit {
+            font-size: 0.85rem; color: var(--text-muted); cursor: pointer;
+            user-select: none; transition: color 0.2s ease;
+            padding: 2px 4px; border-radius: 4px;
+        }
+        .weight-unit:hover { color: var(--accent-cyan); }
 
         .completed-check {
             width: 24px; height: 24px; border-radius: 50%;
@@ -712,6 +717,38 @@ const WEIGHTS_KEY = 'training_weights_v2';
 const HISTORY_KEY = 'training_history';
 const GENERAL_NOTES_KEY = 'training_general_notes';
 const TIMER_PRESETS_KEY = 'timer_presets';
+const WEIGHT_UNITS_KEY = 'weight_units';
+
+function getWeightUnits() {
+    try { return JSON.parse(localStorage.getItem(WEIGHT_UNITS_KEY)) || {}; } catch { return {}; }
+}
+
+function saveWeightUnits(u) {
+    localStorage.setItem(WEIGHT_UNITS_KEY, JSON.stringify(u));
+}
+
+function getUnitForWeight(wid) {
+    return getWeightUnits()[wid] || 'kg';
+}
+
+function toggleWeightUnit(wid) {
+    const units = getWeightUnits();
+    const old = units[wid] || 'kg';
+    const next = old === 'kg' ? 'lbs' : 'kg';
+    units[wid] = next;
+    saveWeightUnits(units);
+    const input = document.querySelector('.weight-input[data-id="' + wid + '"]');
+    if (input && input.value) {
+        const v = parseFloat(input.value);
+        if (!isNaN(v)) {
+            const factor = next === 'lbs' ? 2.20462 : 0.453592;
+            input.value = parseFloat((v * factor).toFixed(1));
+            autoSaveWeight(input);
+        }
+    }
+    const span = input ? input.parentElement.querySelector('.weight-unit') : null;
+    if (span) span.textContent = next === 'kg' ? 'ק"ג' : 'lbs';
+}
 
 const DEFAULT_GENERAL_NOTES = 'כלל ההתקדמות: תראה מה עשית בפעם הקודמת ותנסה להתקדם — בעוד חזרה אחת או בעוד חצי ק"ג משקל עבודה. לא לשכוח כמה סטים חימום לפני משקל העבודה!';
 const DEFAULT_TIMER_PRESETS = [90, 120, 180];
@@ -843,7 +880,7 @@ function renderDay(dayKey) {
                         <input type="number" class="weight-input" data-id="${wid}"
                                placeholder="משקל" value="${savedWeight}" step="0.5" min="0"
                                onchange="autoSaveWeight(this)">
-                        <span class="weight-unit">ק"ג</span>
+                        <span class="weight-unit" onclick="toggleWeightUnit('${wid}')">${getUnitForWeight(wid) === 'lbs' ? 'lbs' : 'ק"ג'}</span>
                     </div>
                     <div class="completed-check" onclick="toggleCheck(this)" title="סיימתי">✓</div>
                     <button class="remove-set-btn" onclick="removeGroup('${dayKey}', ${exIdx}, ${grpIdx})" title="הסר שורה">✕</button>
@@ -1074,7 +1111,8 @@ function showHistory() {
         container.innerHTML = history.map(entry => {
             const lines = Object.entries(entry.weights).slice(0, 6).map(([id, w]) => {
                 const name = findExerciseName(program, id);
-                return `${name}: <strong>${w}</strong> ק"ג`;
+                const u = getUnitForWeight(id);
+                return `${name}: <strong>${w}</strong> ${u === 'lbs' ? 'lbs' : 'ק"ג'}`;
             }).join('<br>');
             const more = Object.keys(entry.weights).length > 6
                 ? `<br><span style="color:var(--text-muted)">...ועוד ${Object.keys(entry.weights).length - 6}</span>` : '';
@@ -1221,6 +1259,7 @@ function exportData() {
         history: getHistory(),
         generalNotes: getGeneralNotes(),
         timerPresets: getTimerPresets(),
+        weightUnits: getWeightUnits(),
         exportDate: new Date().toLocaleString('he-IL')
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -1248,6 +1287,7 @@ function importData(event) {
             if (data.history) localStorage.setItem(HISTORY_KEY, JSON.stringify(data.history));
             if (data.generalNotes != null) localStorage.setItem(GENERAL_NOTES_KEY, data.generalNotes);
             if (data.timerPresets && Array.isArray(data.timerPresets)) saveTimerPresets(data.timerPresets);
+            if (data.weightUnits) saveWeightUnits(data.weightUnits);
             ['A','B','C','D'].forEach(renderDay);
             var notesEl = document.getElementById('general-notes-input');
             notesEl.value = getGeneralNotes();
