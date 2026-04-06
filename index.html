@@ -201,21 +201,6 @@
         .weight-input::placeholder { color: var(--text-muted); font-size: 0.85rem; }
         .weight-unit { font-size: 0.85rem; color: var(--text-muted); }
 
-        .unit-toggle {
-            display: inline-flex; align-items: center; gap: 0;
-            background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 20px; overflow: hidden; font-family: 'Heebo', sans-serif;
-        }
-        .unit-toggle-btn {
-            padding: 8px 16px; border: none; background: transparent;
-            color: var(--text-muted); font-family: 'Heebo', sans-serif;
-            font-size: 0.9rem; font-weight: 600; cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .unit-toggle-btn.active {
-            background: var(--gradient-1); color: #fff;
-        }
-
         .completed-check {
             width: 24px; height: 24px; border-radius: 50%;
             border: 2px solid var(--border-color); display: flex;
@@ -475,13 +460,6 @@
             טיימר
         </button>
 
-        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
-            <div class="unit-toggle" title="משקל">
-                <button class="unit-toggle-btn active" id="unit-kg-btn" onclick="setWeightUnit('kg')">ק"ג</button>
-                <button class="unit-toggle-btn" id="unit-lbs-btn" onclick="setWeightUnit('lbs')">lbs</button>
-            </div>
-        </div>
-
         <div class="tabs">
             <button class="tab-btn active" data-day="A" onclick="switchTab('A')">יום A<br><small>חזה, כתפיים, יד אחורית</small></button>
             <button class="tab-btn" data-day="B" onclick="switchTab('B')">יום B<br><small>גב, כתף אחורית, יד קדמית</small></button>
@@ -734,28 +712,6 @@ const WEIGHTS_KEY = 'training_weights_v2';
 const HISTORY_KEY = 'training_history';
 const GENERAL_NOTES_KEY = 'training_general_notes';
 const TIMER_PRESETS_KEY = 'timer_presets';
-const WEIGHT_UNIT_KEY = 'weight_unit';
-
-function getWeightUnit() {
-    try { return localStorage.getItem(WEIGHT_UNIT_KEY) || 'kg'; } catch { return 'kg'; }
-}
-
-function setWeightUnit(unit) {
-    const oldUnit = getWeightUnit();
-    if (oldUnit === unit) return;
-    localStorage.setItem(WEIGHT_UNIT_KEY, unit);
-    const factor = unit === 'lbs' ? 2.20462 : 0.453592;
-    const weights = getWeights();
-    Object.keys(weights).forEach(k => {
-        const v = parseFloat(weights[k]);
-        if (!isNaN(v)) weights[k] = parseFloat((v * factor).toFixed(1));
-    });
-    saveWeightsData(weights);
-    document.getElementById('unit-kg-btn').classList.toggle('active', unit === 'kg');
-    document.getElementById('unit-lbs-btn').classList.toggle('active', unit === 'lbs');
-    ['A','B','C','D'].forEach(renderDay);
-    showToast(unit === 'lbs' ? 'יחידה: lbs' : 'יחידה: ק"ג');
-}
 
 const DEFAULT_GENERAL_NOTES = 'כלל ההתקדמות: תראה מה עשית בפעם הקודמת ותנסה להתקדם — בעוד חזרה אחת או בעוד חצי ק"ג משקל עבודה. לא לשכוח כמה סטים חימום לפני משקל העבודה!';
 const DEFAULT_TIMER_PRESETS = [90, 120, 180];
@@ -887,7 +843,7 @@ function renderDay(dayKey) {
                         <input type="number" class="weight-input" data-id="${wid}"
                                placeholder="משקל" value="${savedWeight}" step="0.5" min="0"
                                onchange="autoSaveWeight(this)">
-                        <span class="weight-unit">${getWeightUnit() === 'kg' ? 'ק"ג' : 'lbs'}</span>
+                        <span class="weight-unit">ק"ג</span>
                     </div>
                     <div class="completed-check" onclick="toggleCheck(this)" title="סיימתי">✓</div>
                     <button class="remove-set-btn" onclick="removeGroup('${dayKey}', ${exIdx}, ${grpIdx})" title="הסר שורה">✕</button>
@@ -1118,8 +1074,7 @@ function showHistory() {
         container.innerHTML = history.map(entry => {
             const lines = Object.entries(entry.weights).slice(0, 6).map(([id, w]) => {
                 const name = findExerciseName(program, id);
-                const unitLabel = getWeightUnit() === 'lbs' ? 'lbs' : 'ק"ג';
-                return `${name}: <strong>${w}</strong> ${unitLabel}`;
+                return `${name}: <strong>${w}</strong> ק"ג`;
             }).join('<br>');
             const more = Object.keys(entry.weights).length > 6
                 ? `<br><span style="color:var(--text-muted)">...ועוד ${Object.keys(entry.weights).length - 6}</span>` : '';
@@ -1266,7 +1221,6 @@ function exportData() {
         history: getHistory(),
         generalNotes: getGeneralNotes(),
         timerPresets: getTimerPresets(),
-        weightUnit: getWeightUnit(),
         exportDate: new Date().toLocaleString('he-IL')
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -1294,7 +1248,6 @@ function importData(event) {
             if (data.history) localStorage.setItem(HISTORY_KEY, JSON.stringify(data.history));
             if (data.generalNotes != null) localStorage.setItem(GENERAL_NOTES_KEY, data.generalNotes);
             if (data.timerPresets && Array.isArray(data.timerPresets)) saveTimerPresets(data.timerPresets);
-            if (data.weightUnit) localStorage.setItem(WEIGHT_UNIT_KEY, data.weightUnit);
             ['A','B','C','D'].forEach(renderDay);
             var notesEl = document.getElementById('general-notes-input');
             notesEl.value = getGeneralNotes();
@@ -1316,7 +1269,6 @@ var generalNotesEl = document.getElementById('general-notes-input');
 generalNotesEl.value = getGeneralNotes();
 resizeGeneralNotes(generalNotesEl);
 ['A','B','C','D'].forEach(renderDay);
-(function(){var u=getWeightUnit();document.getElementById('unit-kg-btn').classList.toggle('active',u==='kg');document.getElementById('unit-lbs-btn').classList.toggle('active',u==='lbs');})();
 timerRemaining = getTimerPresets()[0] || 90;
 updateTimerDisplay();
 </script>
