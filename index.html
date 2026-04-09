@@ -558,6 +558,22 @@
         .ai-video-nav-btn:disabled { opacity: 0.3; cursor: default; }
         .ai-video-counter { font-size: 0.8rem; color: var(--text-muted); }
 
+
+        .ai-video-fallback {
+            display: flex; align-items: center; gap: 12px; padding: 14px;
+            background: var(--bg-secondary); border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm); flex-wrap: wrap;
+        }
+        .ai-video-fallback div { flex: 1; min-width: 120px; }
+        .ai-video-fallback strong { color: var(--text-primary); font-size: 0.92rem; }
+        .ai-video-fallback span { color: var(--text-muted); font-size: 0.82rem; }
+        .ai-video-link-btn {
+            padding: 8px 18px; background: #ff0000; color: #fff;
+            border-radius: var(--radius-sm); font-family: 'Heebo', sans-serif;
+            font-size: 0.88rem; font-weight: 600; text-decoration: none;
+            transition: all 0.2s ease; white-space: nowrap;
+        }
+        .ai-video-link-btn:hover { background: #cc0000; }
     </style>
 </head>
 <body>
@@ -1484,17 +1500,15 @@ const AI_SYSTEM_PROMPT = `אתה מאמן כושר מוסמך עם ניסיון 
 - שאלת המשך אחת בלבד כשצריך.
 
 ## סרטוני טכניקה:
-כשהמשתמש שואל על טכניקה של תרגיל, או מתאר בעיה בביצוע, חפש ביוטיוב סרטוני הדגמת טכניקה רלוונטיים.
-הוסף בסוף התשובה (ורק בסוף) בלוק:
+כשהמשתמש שואל על טכניקה של תרגיל, או מתאר בעיה בביצוע, הוסף בסוף התשובה בלוק:
 
 :::VIDEO:::
-["VIDEO_ID_1", "VIDEO_ID_2", "VIDEO_ID_3"]
+שאילתת חיפוש ממוקדת ליוטיוב באנגלית
 :::END:::
 
 חוקים לבלוק VIDEO:
-- ה-ID הוא הקוד מתוך כתובת YouTube (למשל dQw4w9WgXcQ).
-- מצא 3-5 סרטונים רלוונטיים בעברית או באנגלית שמדגימים טכניקה נכונה.
-- העדף סרטונים קצרים וממוקדים בטכניקה.
+- כתוב שאילתת חיפוש באנגלית שתמצא סרטון טכניקה ביוטיוב (למשל: "barbell squat proper form technique").
+- הוסף את שם התרגיל באנגלית + "proper form" או "technique".
 - אם השאלה לא קשורה לטכניקה ספציפית (שאלה כללית, ייעוץ על תוכנית) - אל תוסיף את הבלוק.`;
 
 let aiChatMessages = [];
@@ -1648,8 +1662,8 @@ async function callGemini(userText) {
         aiChatMessages.push({ role: 'model', parts: [{ text }] });
         const parsed = parseAiResponse(text);
         if (parsed.text) appendChatMsg('bot', parsed.text);
-        if (parsed.videoIds) appendVideoEmbed(parsed.videoIds);
-        if (!parsed.text && !parsed.videoIds) appendChatMsg('bot', text);
+        if (parsed.videoQuery) appendVideoEmbed(parsed.videoQuery);
+        if (!parsed.text && !parsed.videoQuery) appendChatMsg('bot', text);
 
     } catch {
         removeChatLoading();
@@ -1659,53 +1673,88 @@ async function callGemini(userText) {
 }
 
 
+
 function parseAiResponse(rawText) {
     let text = rawText;
-    let videoIds = null;
+    let videoQuery = null;
 
     const videoMatch = text.match(/:::VIDEO:::\s*([\s\S]*?)\s*:::END:::/);
     if (videoMatch) {
         text = text.replace(videoMatch[0], '').trim();
-        try {
-            const arr = JSON.parse(videoMatch[1].trim());
-            if (Array.isArray(arr) && arr.length > 0) {
-                videoIds = arr.filter(id => typeof id === 'string' && id.length >= 8);
-            }
-        } catch {}
-    }
-
-    if (!videoIds) {
-        const ytRegex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/g;
-        const matches = [...text.matchAll(ytRegex)];
-        if (matches.length > 0) {
-            videoIds = matches.map(m => m[1]);
-            matches.forEach(m => { text = text.replace(m[0], '').trim(); });
+        const q = videoMatch[1].trim();
+        if (q && !q.startsWith('[')) videoQuery = q;
+        else {
+            try {
+                const arr = JSON.parse(q);
+                if (Array.isArray(arr)) videoQuery = arr[0];
+            } catch { videoQuery = q; }
         }
     }
 
-    return { text, videoIds };
+    return { text, videoQuery };
 }
 
-function appendVideoEmbed(videoIds) {
-    if (!videoIds || videoIds.length === 0) return;
+async function searchYouTubeVideos(query) {
+    const apis = [
+        'https://pipedapi.kavin.rocks/search?q=' + encodeURIComponent(query) + '&filter=videos',
+        'https://pipedapi.adminforge.de/search?q=' + encodeURIComponent(query) + '&filter=videos'
+    ];
+    for (const url of apis) {
+        try {
+            const resp = await fetch(url);
+            if (!resp.ok) continue;
+            const data = await resp.json();
+            const items = (data.items || data).filter(i => i.url || i.videoId);
+            const ids = items.slice(0, 5).map(i => {
+                if (i.videoId) return i.videoId;
+                const m = i.url?.match(/\/watch\?v=([\w-]+)/);
+                return m ? m[1] : null;
+            }).filter(Boolean);
+            if (ids.length > 0) return ids;
+        } catch {}
+    }
+    return null;
+}
+
+async function appendVideoEmbed(query) {
+    if (!query) return;
     const container = document.getElementById('ai-chat-messages');
+
+    const loadDiv = document.createElement('div');
+    loadDiv.className = 'ai-msg ai-msg-bot';
+    loadDiv.id = 'video-loading';
+    loadDiv.innerHTML = '<div class="ai-thinking"><span class="ai-thinking-text">\u05DE\u05D7\u05E4\u05E9 \u05E1\u05E8\u05D8\u05D5\u05E0\u05D9\u05DD...</span><span class="ai-loading-dots"><span></span><span></span><span></span></span></div>';
+    container.appendChild(loadDiv);
+    container.scrollTop = container.scrollHeight;
+
+    const ids = await searchYouTubeVideos(query);
+    const vl = document.getElementById('video-loading');
+    if (vl) vl.remove();
+
+    if (!ids || ids.length === 0) {
+        const linkDiv = document.createElement('div');
+        linkDiv.className = 'ai-msg ai-msg-bot';
+        const ytUrl = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(query);
+        linkDiv.innerHTML = '<div class="ai-video-fallback"><svg viewBox="0 0 24 24" width="28" height="28" fill="#ff0000"><path d="M23.5 6.2c-.3-1-1-1.8-2-2.1C19.6 3.5 12 3.5 12 3.5s-7.6 0-9.5.6c-1 .3-1.8 1.1-2 2.1C0 8.1 0 12 0 12s0 3.9.5 5.8c.3 1 1 1.8 2 2.1 1.9.6 9.5.6 9.5.6s7.6 0 9.5-.6c1-.3 1.8-1.1 2-2.1.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8z"/><polygon fill="#fff" points="9.8,15.5 15.8,12 9.8,8.5"/></svg><div><strong>\u05E6\u05E4\u05D4 \u05D1\u05D9\u05D5\u05D8\u05D9\u05D5\u05D1</strong><br><span>' + escapeHtmlChat(query) + '</span></div><a href="' + ytUrl + '" target="_blank" rel="noopener" class="ai-video-link-btn">\u05E4\u05EA\u05D7 \u05D1\u05D9\u05D5\u05D8\u05D9\u05D5\u05D1</a></div>';
+        container.appendChild(linkDiv);
+        container.scrollTop = container.scrollHeight;
+        return;
+    }
+
     const div = document.createElement('div');
     div.className = 'ai-msg ai-msg-bot';
-    div.dataset.videoIds = JSON.stringify(videoIds);
+    div.dataset.videoIds = JSON.stringify(ids);
     div.dataset.videoIdx = '0';
-
-    const total = videoIds.length;
-    const prevText = '\u05D4\u05E7\u05D5\u05D3\u05DD';
-    const nextText = '\u05E1\u05E8\u05D8\u05D5\u05DF \u05D4\u05D1\u05D0';
+    const total = ids.length;
 
     div.innerHTML =
         '<div class="ai-video-container">' +
-            '<iframe src="https://www.youtube.com/embed/' + videoIds[0] + '" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>' +
+            '<iframe src="https://www.youtube.com/embed/' + ids[0] + '" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>' +
         '</div>' +
         (total > 1 ? '<div class="ai-video-nav">' +
-            '<button class="ai-video-nav-btn" onclick="changeVideo(this,-1)" disabled>' + prevText + '</button>' +
+            '<button class="ai-video-nav-btn" onclick="changeVideo(this,-1)" disabled>\u05D4\u05E7\u05D5\u05D3\u05DD</button>' +
             '<span class="ai-video-counter">1 / ' + total + '</span>' +
-            '<button class="ai-video-nav-btn" onclick="changeVideo(this,1)">' + nextText + '</button>' +
+            '<button class="ai-video-nav-btn" onclick="changeVideo(this,1)">\u05E1\u05E8\u05D8\u05D5\u05DF \u05D4\u05D1\u05D0</button>' +
         '</div>' : '');
 
     container.appendChild(div);
@@ -1728,6 +1777,7 @@ function changeVideo(btn, direction) {
     buttons[1].disabled = idx === ids.length - 1;
     nav.querySelector('.ai-video-counter').textContent = (idx + 1) + ' / ' + ids.length;
 }
+
 
 setupAiChat();
 
