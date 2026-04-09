@@ -534,6 +534,30 @@
             font-size: 0.82rem; cursor: pointer; text-decoration: underline;
         }
         .ai-change-key:hover { color: var(--text-secondary); }
+
+        .ai-video-container {
+            margin-top: 8px; border-radius: var(--radius-sm);
+            overflow: hidden; background: #000; position: relative;
+        }
+        .ai-video-container iframe {
+            width: 100%; aspect-ratio: 16/9; border: none; display: block;
+        }
+        .ai-video-nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 12px; background: var(--bg-secondary);
+            border: 1px solid var(--border-color); border-top: none;
+            border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+        }
+        .ai-video-nav-btn {
+            padding: 6px 14px; border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm); background: var(--bg-card);
+            color: var(--text-secondary); font-family: 'Heebo', sans-serif;
+            font-size: 0.82rem; cursor: pointer; transition: all 0.2s ease;
+        }
+        .ai-video-nav-btn:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+        .ai-video-nav-btn:disabled { opacity: 0.3; cursor: default; }
+        .ai-video-counter { font-size: 0.8rem; color: var(--text-muted); }
+
     </style>
 </head>
 <body>
@@ -1457,7 +1481,21 @@ const AI_SYSTEM_PROMPT = `אתה מאמן כושר מוסמך עם ניסיון 
 - תמציתי וקולע! 2-4 משפטים לעניין + טיפ אחד קצר.
 - בלי markdown (בלי כוכביות, בלי סולמיות). השתמש במקפים ושורות חדשות.
 - אם יש חשש לפציעה רצינית, תמיד המלץ לפנות לפיזיותרפיסט.
-- שאלת המשך אחת בלבד כשצריך.`;
+- שאלת המשך אחת בלבד כשצריך.
+
+## סרטוני טכניקה:
+כשהמשתמש שואל על טכניקה של תרגיל, או מתאר בעיה בביצוע, חפש ביוטיוב סרטוני הדגמת טכניקה רלוונטיים.
+הוסף בסוף התשובה (ורק בסוף) בלוק:
+
+:::VIDEO:::
+["VIDEO_ID_1", "VIDEO_ID_2", "VIDEO_ID_3"]
+:::END:::
+
+חוקים לבלוק VIDEO:
+- ה-ID הוא הקוד מתוך כתובת YouTube (למשל dQw4w9WgXcQ).
+- מצא 3-5 סרטונים רלוונטיים בעברית או באנגלית שמדגימים טכניקה נכונה.
+- העדף סרטונים קצרים וממוקדים בטכניקה.
+- אם השאלה לא קשורה לטכניקה ספציפית (שאלה כללית, ייעוץ על תוכנית) - אל תוסיף את הבלוק.`;
 
 let aiChatMessages = [];
 
@@ -1582,6 +1620,7 @@ async function callGemini(userText) {
     const body = {
         system_instruction: { parts: [{ text: systemPrompt }] },
         contents: aiChatMessages,
+        tools: [{ google_search: {} }],
         generationConfig: { temperature: 0.7, maxOutputTokens: 4096 }
     };
 
@@ -1607,13 +1646,87 @@ async function callGemini(userText) {
         const data = await resp.json();
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
         aiChatMessages.push({ role: 'model', parts: [{ text }] });
-        appendChatMsg('bot', text);
+        const parsed = parseAiResponse(text);
+        if (parsed.text) appendChatMsg('bot', parsed.text);
+        if (parsed.videoIds) appendVideoEmbed(parsed.videoIds);
+        if (!parsed.text && !parsed.videoIds) appendChatMsg('bot', text);
 
     } catch {
         removeChatLoading();
         appendAiError('שגיאת חיבור. בדוק את האינטרנט ונסה שוב.');
         aiChatMessages.pop();
     }
+}
+
+
+function parseAiResponse(rawText) {
+    let text = rawText;
+    let videoIds = null;
+
+    const videoMatch = text.match(/:::VIDEO:::\s*([\s\S]*?)\s*:::END:::/);
+    if (videoMatch) {
+        text = text.replace(videoMatch[0], '').trim();
+        try {
+            const arr = JSON.parse(videoMatch[1].trim());
+            if (Array.isArray(arr) && arr.length > 0) {
+                videoIds = arr.filter(id => typeof id === 'string' && id.length >= 8);
+            }
+        } catch {}
+    }
+
+    if (!videoIds) {
+        const ytRegex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/g;
+        const matches = [...text.matchAll(ytRegex)];
+        if (matches.length > 0) {
+            videoIds = matches.map(m => m[1]);
+            matches.forEach(m => { text = text.replace(m[0], '').trim(); });
+        }
+    }
+
+    return { text, videoIds };
+}
+
+function appendVideoEmbed(videoIds) {
+    if (!videoIds || videoIds.length === 0) return;
+    const container = document.getElementById('ai-chat-messages');
+    const div = document.createElement('div');
+    div.className = 'ai-msg ai-msg-bot';
+    div.dataset.videoIds = JSON.stringify(videoIds);
+    div.dataset.videoIdx = '0';
+
+    const total = videoIds.length;
+    const prevText = '\u05D4\u05E7\u05D5\u05D3\u05DD';
+    const nextText = '\u05E1\u05E8\u05D8\u05D5\u05DF \u05D4\u05D1\u05D0';
+
+    div.innerHTML =
+        '<div class="ai-video-container">' +
+            '<iframe src="https://www.youtube.com/embed/' + videoIds[0] + '" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>' +
+        '</div>' +
+        (total > 1 ? '<div class="ai-video-nav">' +
+            '<button class="ai-video-nav-btn" onclick="changeVideo(this,-1)" disabled>' + prevText + '</button>' +
+            '<span class="ai-video-counter">1 / ' + total + '</span>' +
+            '<button class="ai-video-nav-btn" onclick="changeVideo(this,1)">' + nextText + '</button>' +
+        '</div>' : '');
+
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function changeVideo(btn, direction) {
+    const wrapper = btn.closest('.ai-msg');
+    const ids = JSON.parse(wrapper.dataset.videoIds);
+    let idx = parseInt(wrapper.dataset.videoIdx) + direction;
+    idx = Math.max(0, Math.min(ids.length - 1, idx));
+    wrapper.dataset.videoIdx = idx;
+
+    const iframe = wrapper.querySelector('iframe');
+    iframe.src = 'https://www.youtube.com/embed/' + ids[idx];
+
+    const nav = wrapper.querySelector('.ai-video-nav');
+    const buttons = nav.querySelectorAll('.ai-video-nav-btn');
+    buttons[0].disabled = idx === 0;
+    buttons[1].disabled = idx === ids.length - 1;
+    nav.querySelector('.ai-video-counter').textContent = (idx + 1) + ' / ' + ids.length;
 }
 
 setupAiChat();
