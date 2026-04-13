@@ -138,6 +138,7 @@
         [data-day="B"] .exercise-number { background: var(--gradient-2); }
         [data-day="C"] .exercise-number { background: var(--gradient-3); }
         [data-day="D"] .exercise-number { background: var(--gradient-4); }
+        .exercise-number.done { background: var(--accent-green) !important; }
 
         .exercise-name { font-weight: 600; font-size: 1.1rem; }
         .exercise-name-input {
@@ -1006,7 +1007,7 @@ function renderDay(dayKey) {
         <div class="exercise-card" data-day="${dayKey}">
             <div class="exercise-header" onclick="toggleExercise(this)">
                 <div class="right-side">
-                    <div class="exercise-number">${exIdx + 1}</div>
+                    <div class="exercise-number" data-num="${exIdx + 1}">${exIdx + 1}</div>
                     <span class="exercise-name">${exercise.name}</span>
                 </div>
                 <span class="exercise-sets-badge">${badge}</span>
@@ -1111,6 +1112,14 @@ function toggleExercise(header) {
 
 function toggleCheck(el) {
     el.classList.toggle('checked');
+    var card = el.closest('.exercise-card');
+    if (!card) return;
+    var checks = card.querySelectorAll('.completed-check');
+    var done = card.querySelectorAll('.completed-check.checked');
+    var num = card.querySelector('.exercise-number');
+    if (!num || !checks.length) return;
+    if (done.length === checks.length) { num.classList.add('done'); num.textContent = '\u2713'; }
+    else { num.classList.remove('done'); num.textContent = num.dataset.num || num.textContent; }
 }
 
 function autoSaveWeight(input) {
