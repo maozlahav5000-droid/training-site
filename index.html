@@ -638,7 +638,7 @@
             <button class="tab-btn" data-day="B" onclick="switchTab('B')">יום B<br><small>גב, כתף אחורית, יד קדמית</small></button>
             <button class="tab-btn" data-day="C" onclick="switchTab('C')">יום C<br><small>ירכיים, ישבן, תאומים</small></button>
             <button class="tab-btn" data-day="D" onclick="switchTab('D')">יום D<br><small>חזה, גב, כתפיים, ידיים</small></button>
-            <button class="tab-btn" data-day="E" onclick="switchTab('E')">יום E<br><small>יום חופשי</small></button>
+            <button class="tab-btn" data-day="E" onclick="switchTab('E')">יום E<br><small>רגליים, תאומים</small></button>
         </div>
 
         <div id="day-A" class="tab-content active" data-day="A"></div>
@@ -809,27 +809,7 @@ const defaultWorkoutData = {
             },
             {
                 name: "פשיטת ברכיים במכונה",
-                groups: [{ sets: 3, reps: 12 }],
-                notes: []
-            },
-            {
-                name: "כפיפת ברכיים במכונה",
-                groups: [{ sets: 3, reps: 10 }],
-                notes: []
-            },
-            {
-                name: "לחיצת רגליים במכונה עם פלטות",
-                groups: [{ sets: 3, reps: 8 }, { sets: 1, reps: 10, label: "דרופ סט" }],
-                notes: []
-            },
-            {
-                name: "תאומים בעמידה",
-                groups: [{ sets: 3, reps: 12 }],
-                notes: []
-            },
-            {
-                name: "תאומים בישיבה",
-                groups: [{ sets: 3, reps: 12 }],
+                groups: [{ sets: 3, reps: 12 }, { sets: 1, reps: 12, label: "דרופ סט" }, { sets: 1, reps: 12, label: "דרופ סט" }],
                 notes: []
             }
         ]
@@ -881,9 +861,35 @@ const defaultWorkoutData = {
         ]
     },
     E: {
-        title: "יום E — יום חופשי",
-        subtitle: "אימון חופשי",
-        exercises: []
+        title: "יום E — רגליים",
+        subtitle: "אימון כבד",
+        exercises: [
+            {
+                name: "לחיצת רגליים במכונה עם פלטות",
+                groups: [{ sets: 3, reps: 6 }, { sets: 1, reps: 10, label: "דרופ סט" }],
+                notes: []
+            },
+            {
+                name: "פשיטת ברכיים במכונה",
+                groups: [{ sets: 3, reps: 8 }],
+                notes: []
+            },
+            {
+                name: "כפיפת ברכיים במכונה",
+                groups: [{ sets: 3, reps: 10 }],
+                notes: []
+            },
+            {
+                name: "תאומים בעמידה",
+                groups: [{ sets: 3, reps: 12 }],
+                notes: []
+            },
+            {
+                name: "תאומים בישיבה",
+                groups: [{ sets: 3, reps: 12 }],
+                notes: []
+            }
+        ]
     }
 };
 
