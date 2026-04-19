@@ -35,6 +35,7 @@
             --gradient-2: linear-gradient(135deg, #00d4ff, #4361ee);
             --gradient-3: linear-gradient(135deg, #00e676, #00d4ff);
             --gradient-4: linear-gradient(135deg, #ff9100, #ff5252);
+            --gradient-5: linear-gradient(135deg, #e040fb, #7c4dff);
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
             --shadow-md: 0 4px 20px rgba(0,0,0,0.4);
             --shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
@@ -107,6 +108,7 @@
         .tab-btn[data-day="B"].active { background: var(--gradient-2); }
         .tab-btn[data-day="C"].active { background: var(--gradient-3); }
         .tab-btn[data-day="D"].active { background: var(--gradient-4); }
+        .tab-btn[data-day="E"].active { background: var(--gradient-5); }
 
         .tab-content { display: none; animation: fadeIn 0.3s ease; }
         .tab-content.active { display: block; }
@@ -138,6 +140,7 @@
         [data-day="B"] .exercise-number { background: var(--gradient-2); }
         [data-day="C"] .exercise-number { background: var(--gradient-3); }
         [data-day="D"] .exercise-number { background: var(--gradient-4); }
+        [data-day="E"] .exercise-number { background: var(--gradient-5); }
         .exercise-number.done { background: var(--accent-green) !important; }
 
         .exercise-name { font-weight: 600; font-size: 1.1rem; }
@@ -635,12 +638,14 @@
             <button class="tab-btn" data-day="B" onclick="switchTab('B')">יום B<br><small>גב, כתף אחורית, יד קדמית</small></button>
             <button class="tab-btn" data-day="C" onclick="switchTab('C')">יום C<br><small>ירכיים, ישבן, תאומים</small></button>
             <button class="tab-btn" data-day="D" onclick="switchTab('D')">יום D<br><small>חזה, גב, כתפיים, ידיים</small></button>
+            <button class="tab-btn" data-day="E" onclick="switchTab('E')">יום E<br><small>יום חופשי</small></button>
         </div>
 
         <div id="day-A" class="tab-content active" data-day="A"></div>
         <div id="day-B" class="tab-content" data-day="B"></div>
         <div id="day-C" class="tab-content" data-day="C"></div>
         <div id="day-D" class="tab-content" data-day="D"></div>
+        <div id="day-E" class="tab-content" data-day="E"></div>
 
         <div class="actions-bar">
             <button class="btn btn-primary" onclick="saveWeights()">
@@ -874,6 +879,11 @@ const defaultWorkoutData = {
                 notes: []
             }
         ]
+    },
+    E: {
+        title: "יום E — יום חופשי",
+        subtitle: "אימון חופשי",
+        exercises: []
     }
 };
 
@@ -1255,14 +1265,14 @@ function saveWeights() {
 function clearCurrentWeights() {
     if (!confirm('האם לאפס את כל המשקלים הנוכחיים?')) return;
     localStorage.removeItem(WEIGHTS_KEY);
-    ['A','B','C','D'].forEach(renderDay);
+    ['A','B','C','D','E'].forEach(renderDay);
     showToast('המשקלים אופסו');
 }
 
 function resetProgram() {
     if (!confirm('האם לשחזר את התוכנית המקורית? כל השינויים שביצעת (הערות, סטים, שמות תרגילים) יימחקו.')) return;
     localStorage.removeItem(PROGRAM_KEY);
-    ['A','B','C','D'].forEach(renderDay);
+    ['A','B','C','D','E'].forEach(renderDay);
     showToast('התוכנית שוחזרה למקור');
 }
 
@@ -1463,7 +1473,7 @@ function importData(event) {
             if (data.timerPresets && Array.isArray(data.timerPresets)) saveTimerPresets(data.timerPresets);
             if (data.geminiKey) saveGeminiKeyVal(data.geminiKey);
             if (data.weightUnits) saveWeightUnits(data.weightUnits);
-            ['A','B','C','D'].forEach(renderDay);
+            ['A','B','C','D','E'].forEach(renderDay);
             var notesEl = document.getElementById('general-notes-input');
             notesEl.value = getGeneralNotes();
             resizeGeneralNotes(notesEl);
@@ -1483,7 +1493,7 @@ if ('serviceWorker' in navigator) {
 var generalNotesEl = document.getElementById('general-notes-input');
 generalNotesEl.value = getGeneralNotes();
 resizeGeneralNotes(generalNotesEl);
-['A','B','C','D'].forEach(renderDay);
+['A','B','C','D','E'].forEach(renderDay);
 timerRemaining = getTimerPresets()[0] || 90;
 updateTimerDisplay();
 
@@ -1533,7 +1543,7 @@ function saveGeminiKeyVal(key) {
 function buildWorkoutContext() {
     const program = getProgram();
     const parts = ['תוכנית האימונים של המשתמש:'];
-    ['A','B','C','D'].forEach(day => {
+    ['A','B','C','D','E'].forEach(day => {
         const d = program[day];
         if (!d) return;
         const exercises = d.exercises.map((e, i) => {
