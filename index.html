@@ -937,7 +937,13 @@ const DEFAULT_TIMER_PRESETS = [90, 120, 180];
 function getProgram() {
     try {
         const saved = localStorage.getItem(PROGRAM_KEY);
-        if (saved) return JSON.parse(saved);
+        if (saved) {
+            const data = JSON.parse(saved);
+            Object.keys(defaultWorkoutData).forEach(day => {
+                if (!data[day]) data[day] = JSON.parse(JSON.stringify(defaultWorkoutData[day]));
+            });
+            return data;
+        }
     } catch {}
     return JSON.parse(JSON.stringify(defaultWorkoutData));
 }
