@@ -1,7 +1,7 @@
 {
     "name": "תוכנית אימונים",
     "short_name": "אימונים",
-    "description": "תוכנית אימונים - 4 ימים בשבוע",
+    "description": "תוכנית אימונים - 5 ימים בשבוע",
     "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#0a0a0f",

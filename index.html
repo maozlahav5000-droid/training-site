@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>תוכנית אימונים - 4 ימים בשבוע</title>
+    <title>תוכנית אימונים - 5 ימים בשבוע</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4361ee">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -472,6 +472,15 @@
         .ai-key-setup { text-align: center; padding: 12px 0; }
         .ai-key-setup p { font-size: 0.92rem; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.6; }
         .ai-key-setup a { display: inline-block; color: var(--accent-cyan); font-weight: 600; font-size: 0.9rem; margin-bottom: 14px; }
+        .ai-key-note {
+            margin: -4px 0 12px; color: var(--text-muted); font-size: 0.8rem;
+            line-height: 1.5;
+        }
+        .ai-setup-status {
+            min-height: 22px; margin-top: 10px; color: var(--accent-cyan);
+            font-size: 0.84rem; line-height: 1.5;
+        }
+        .ai-setup-status.error { color: var(--accent-red); }
         .ai-key-input-row { display: flex; gap: 8px; }
         .ai-key-input-row input {
             flex: 1; padding: 10px 12px; background: var(--bg-primary);
@@ -481,6 +490,16 @@
         }
         .ai-key-input-row input:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(67,97,238,0.15); }
         .ai-chat-area { display: flex; flex-direction: column; }
+        .ai-model-row {
+            display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+            color: var(--text-secondary); font-size: 0.84rem;
+        }
+        .ai-model-row label { white-space: nowrap; }
+        .ai-model-row select {
+            min-width: 0; flex: 1; padding: 8px 10px; border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color); background: var(--bg-primary);
+            color: var(--text-primary); font-family: 'Heebo', sans-serif;
+        }
         .ai-chat-messages {
             max-height: 400px; overflow-y: auto; display: flex;
             flex-direction: column; gap: 10px; padding: 4px 0 12px;
@@ -584,7 +603,7 @@
     <div class="container">
         <header>
             <h1>תוכנית אימונים</h1>
-            <p>4 אימונים בשבוע</p>
+            <p>5 אימונים בשבוע</p>
         </header>
 
         <div class="tip-banner">
@@ -607,14 +626,20 @@
             </button>
             <div class="ai-chat-body" id="ai-chat-body">
                 <div class="ai-key-setup" id="ai-key-setup">
-                    <p>כדי להשתמש בצ'אט, צריך מפתח API של Google Gemini (חינם)</p>
-                    <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">קבל מפתח בחינם</a>
+                    <p>חבר את מאמן ה‑AI לחשבון NVIDIA InferenceHub שלך</p>
+                    <a href="https://inference.nvidia.com/key-management" target="_blank" rel="noopener">ניהול מפתחות ב‑InferenceHub</a>
+                    <div class="ai-key-note">המפתח נשמר רק במכשיר הזה ואינו נכלל בגיבוי.</div>
                     <div class="ai-key-input-row">
-                        <input type="password" id="ai-key-input" placeholder="הדבק מפתח API כאן..." autocomplete="off">
-                        <button id="ai-key-save" class="btn btn-primary" style="padding:10px 20px">שמור</button>
+                        <input type="password" id="ai-key-input" placeholder="הדבק מפתח NVIDIA API..." autocomplete="off">
+                        <button type="button" id="ai-key-save" class="btn btn-primary" style="padding:10px 20px">חבר</button>
                     </div>
+                    <div class="ai-setup-status" id="ai-setup-status" role="status" aria-live="polite"></div>
                 </div>
                 <div class="ai-chat-area" id="ai-chat-area" style="display:none">
+                    <div class="ai-model-row">
+                        <label for="ai-model-select">מודל Claude</label>
+                        <select id="ai-model-select" aria-label="בחירת מודל Claude"></select>
+                    </div>
                     <div class="ai-chat-messages" id="ai-chat-messages">
                         <div class="ai-msg ai-msg-bot"><div class="ai-msg-text">היי! אני המאמן האישי שלך. אפשר לשאול אותי:
 - איך לבצע תרגיל נכון?
@@ -1454,7 +1479,6 @@ function exportData() {
         history: getHistory(),
         generalNotes: getGeneralNotes(),
         timerPresets: getTimerPresets(),
-        geminiKey: loadGeminiKey(),
         weightUnits: getWeightUnits(),
         exportDate: new Date().toLocaleString('he-IL')
     };
@@ -1483,13 +1507,12 @@ function importData(event) {
             if (data.history) localStorage.setItem(HISTORY_KEY, JSON.stringify(data.history));
             if (data.generalNotes != null) localStorage.setItem(GENERAL_NOTES_KEY, data.generalNotes);
             if (data.timerPresets && Array.isArray(data.timerPresets)) saveTimerPresets(data.timerPresets);
-            if (data.geminiKey) saveGeminiKeyVal(data.geminiKey);
             if (data.weightUnits) saveWeightUnits(data.weightUnits);
             ['A','B','C','D','E'].forEach(renderDay);
             var notesEl = document.getElementById('general-notes-input');
             notesEl.value = getGeneralNotes();
             resizeGeneralNotes(notesEl);
-            showToast('הגיבוי יובא בהצלחה!');
+            showToast('הגיבוי יובא ונשמר במכשיר בלבד!');
         } catch {
             showToast('שגיאה בקריאת הקובץ');
         }
@@ -1509,9 +1532,11 @@ resizeGeneralNotes(generalNotesEl);
 timerRemaining = getTimerPresets()[0] || 90;
 updateTimerDisplay();
 
-const GEMINI_KEY_STORAGE = 'training_gemini_key';
-const GEMINI_MODEL = 'gemini-2.5-flash';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const NVIDIA_KEY_STORAGE = 'training_nvidia_key';
+const NVIDIA_MODEL_STORAGE = 'training_nvidia_claude_model';
+const NVIDIA_API_BASE = 'https://inference-api.nvidia.com/v1';
+const NVIDIA_MODELS_URL = NVIDIA_API_BASE + '/models';
+const NVIDIA_CHAT_URL = NVIDIA_API_BASE + '/chat/completions';
 
 const AI_SYSTEM_PROMPT = `אתה מאמן כושר מוסמך עם ניסיון של 15 שנה באימון כוח ושיקום. השם שלך "מאמן". אתה משלב ידע אנטומי ופיזיולוגי עם גישה חמה ומקצועית.
 
@@ -1543,13 +1568,23 @@ const AI_SYSTEM_PROMPT = `אתה מאמן כושר מוסמך עם ניסיון 
 - אם השאלה לא קשורה לטכניקה ספציפית (שאלה כללית, ייעוץ על תוכנית) - אל תוסיף את הבלוק.`;
 
 let aiChatMessages = [];
+let availableClaudeModels = [];
 
-function loadGeminiKey() {
-    return localStorage.getItem(GEMINI_KEY_STORAGE) || '';
+function loadNvidiaKey() {
+    return localStorage.getItem(NVIDIA_KEY_STORAGE) || '';
 }
 
-function saveGeminiKeyVal(key) {
-    localStorage.setItem(GEMINI_KEY_STORAGE, key);
+function saveNvidiaKey(key) {
+    localStorage.setItem(NVIDIA_KEY_STORAGE, key);
+}
+
+function loadNvidiaModel() {
+    return localStorage.getItem(NVIDIA_MODEL_STORAGE) || '';
+}
+
+function saveNvidiaModel(model) {
+    if (model) localStorage.setItem(NVIDIA_MODEL_STORAGE, model);
+    else localStorage.removeItem(NVIDIA_MODEL_STORAGE);
 }
 
 function buildWorkoutContext() {
@@ -1578,6 +1613,7 @@ function setupAiChat() {
     const toggle = document.getElementById('ai-chat-toggle');
     const keySaveBtn = document.getElementById('ai-key-save');
     const keyInput = document.getElementById('ai-key-input');
+    const modelSelect = document.getElementById('ai-model-select');
     const sendBtn = document.getElementById('ai-chat-send');
     const chatInput = document.getElementById('ai-chat-input');
     const changeKeyBtn = document.getElementById('ai-change-key');
@@ -1587,16 +1623,35 @@ function setupAiChat() {
         if (section.classList.contains('expanded')) updateAiChatView();
     });
 
-    keySaveBtn.addEventListener('click', () => {
+    keySaveBtn.addEventListener('click', async () => {
         const key = keyInput.value.trim();
         if (!key) return;
-        saveGeminiKeyVal(key);
-        keyInput.value = '';
-        updateAiChatView();
+        keySaveBtn.disabled = true;
+        setAiSetupStatus('בודק את המפתח ומחפש מודלים של Claude...');
+        try {
+            await configureNvidiaKey(key);
+            keyInput.value = '';
+            setAiSetupStatus('');
+            updateAiChatView();
+        } catch (error) {
+            localStorage.removeItem(NVIDIA_KEY_STORAGE);
+            saveNvidiaModel('');
+            setAiSetupStatus(error.message || 'לא ניתן להתחבר ל‑NVIDIA InferenceHub.', true);
+        } finally {
+            keySaveBtn.disabled = false;
+        }
     });
 
     keyInput.addEventListener('keydown', e => { if (e.key === 'Enter') keySaveBtn.click(); });
-    changeKeyBtn.addEventListener('click', () => { localStorage.removeItem(GEMINI_KEY_STORAGE); updateAiChatView(); });
+    modelSelect.addEventListener('change', () => saveNvidiaModel(modelSelect.value));
+    changeKeyBtn.addEventListener('click', () => {
+        localStorage.removeItem(NVIDIA_KEY_STORAGE);
+        saveNvidiaModel('');
+        availableClaudeModels = [];
+        aiChatMessages = [];
+        setAiSetupStatus('');
+        updateAiChatView();
+    });
     sendBtn.addEventListener('click', () => sendAiMessage());
     chatInput.addEventListener('keydown', e => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAiMessage(); }
@@ -1604,9 +1659,81 @@ function setupAiChat() {
 }
 
 function updateAiChatView() {
-    const key = loadGeminiKey();
+    const key = loadNvidiaKey();
     document.getElementById('ai-key-setup').style.display = key ? 'none' : 'block';
     document.getElementById('ai-chat-area').style.display = key ? 'flex' : 'none';
+    if (key) ensureClaudeModels();
+}
+
+function setAiSetupStatus(message, isError) {
+    const status = document.getElementById('ai-setup-status');
+    status.textContent = message || '';
+    status.classList.toggle('error', Boolean(isError));
+}
+
+function rankClaudeModel(id) {
+    const value = id.toLowerCase();
+    if (value.includes('sonnet')) return 3;
+    if (value.includes('opus')) return 2;
+    if (value.includes('haiku')) return 1;
+    return 0;
+}
+
+function normalizeModelList(data) {
+    const rawModels = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+    return rawModels
+        .map(item => typeof item === 'string' ? item : item?.id)
+        .filter(id => typeof id === 'string' && id.toLowerCase().includes('claude'))
+        .sort((a, b) => rankClaudeModel(b) - rankClaudeModel(a) || b.localeCompare(a, undefined, { numeric: true }));
+}
+
+async function fetchClaudeModels(key) {
+    const resp = await fetch(NVIDIA_MODELS_URL, {
+        headers: { 'Authorization': 'Bearer ' + key }
+    });
+    const data = await resp.json().catch(() => null);
+    if (!resp.ok) {
+        if (resp.status === 401 || resp.status === 403) throw new Error('המפתח אינו תקין או שאין לו הרשאה למודלים.');
+        if (resp.status === 429) throw new Error('חרגת ממגבלת הבקשות. נסה שוב בעוד דקה.');
+        throw new Error(data?.error?.message || data?.detail || 'שגיאה בחיבור ל‑NVIDIA InferenceHub.');
+    }
+    const models = normalizeModelList(data);
+    if (!models.length) throw new Error('לא נמצא מודל Claude זמין למפתח הזה. בדוק בקטלוג InferenceHub שהמודל מאושר לחשבונך.');
+    return models;
+}
+
+function renderClaudeModels(models) {
+    const select = document.getElementById('ai-model-select');
+    const saved = loadNvidiaModel();
+    select.innerHTML = models.map(model => '<option value="' + escapeHtmlChat(model) + '">' + escapeHtmlChat(model) + '</option>').join('');
+    const selected = models.includes(saved) ? saved : models[0];
+    select.value = selected;
+    saveNvidiaModel(selected);
+}
+
+async function configureNvidiaKey(key) {
+    const models = await fetchClaudeModels(key);
+    saveNvidiaKey(key);
+    availableClaudeModels = models;
+    renderClaudeModels(models);
+}
+
+async function ensureClaudeModels() {
+    if (availableClaudeModels.length) {
+        renderClaudeModels(availableClaudeModels);
+        return;
+    }
+    const key = loadNvidiaKey();
+    if (!key) return;
+    try {
+        availableClaudeModels = await fetchClaudeModels(key);
+        renderClaudeModels(availableClaudeModels);
+    } catch (error) {
+        localStorage.removeItem(NVIDIA_KEY_STORAGE);
+        saveNvidiaModel('');
+        updateAiChatView();
+        setAiSetupStatus(error.message || 'לא ניתן להתחבר ל‑NVIDIA InferenceHub.', true);
+    }
 }
 
 function sendAiMessage() {
@@ -1616,7 +1743,7 @@ function sendAiMessage() {
     input.value = '';
     appendChatMsg('user', text);
     appendChatLoading();
-    callGemini(text);
+    callNvidia(text);
 }
 
 function appendChatMsg(role, content) {
@@ -1654,25 +1781,30 @@ function appendAiError(msg) {
     container.scrollTop = container.scrollHeight;
 }
 
-async function callGemini(userText) {
-    const key = loadGeminiKey();
+async function callNvidia(userText) {
+    const key = loadNvidiaKey();
+    const model = loadNvidiaModel();
     if (!key) { removeChatLoading(); appendAiError('לא הוגדר מפתח API.'); return; }
+    if (!model) { removeChatLoading(); appendAiError('לא נמצא מודל Claude זמין.'); return; }
 
-    aiChatMessages.push({ role: 'user', parts: [{ text: userText }] });
+    aiChatMessages.push({ role: 'user', content: userText });
 
     const systemPrompt = AI_SYSTEM_PROMPT + buildWorkoutContext();
 
     const body = {
-        system_instruction: { parts: [{ text: systemPrompt }] },
-        contents: aiChatMessages,
-        tools: [{ google_search: {} }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 4096 }
+        model,
+        messages: [{ role: 'system', content: systemPrompt }, ...aiChatMessages],
+        max_tokens: 2048,
+        stream: false
     };
 
     try {
-        const resp = await fetch(GEMINI_URL + '?key=' + key, {
+        const resp = await fetch(NVIDIA_CHAT_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + key
+            },
             body: JSON.stringify(body)
         });
 
@@ -1680,8 +1812,9 @@ async function callGemini(userText) {
 
         if (!resp.ok) {
             const errData = await resp.json().catch(() => null);
-            const errMsg = errData?.error?.message || 'שגיאה ' + resp.status;
-            if (resp.status === 400 || resp.status === 403) appendAiError('מפתח API לא תקין. ' + errMsg);
+            const errMsg = errData?.error?.message || errData?.detail || 'שגיאה ' + resp.status;
+            if (resp.status === 401 || resp.status === 403) appendAiError('מפתח API לא תקין או שאין הרשאה למודל. ' + errMsg);
+            else if (resp.status === 400 || resp.status === 404) appendAiError('המודל שנבחר אינו זמין. נסה לבחור מודל Claude אחר. ' + errMsg);
             else if (resp.status === 429) appendAiError('חרגת ממגבלת הבקשות. נסה שוב בעוד דקה.');
             else appendAiError('שגיאה: ' + errMsg);
             aiChatMessages.pop();
@@ -1689,8 +1822,8 @@ async function callGemini(userText) {
         }
 
         const data = await resp.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        aiChatMessages.push({ role: 'model', parts: [{ text }] });
+        const text = data.choices?.[0]?.message?.content || '';
+        aiChatMessages.push({ role: 'assistant', content: text });
         const parsed = parseAiResponse(text);
         if (parsed.text) appendChatMsg('bot', parsed.text);
         if (parsed.videoQuery) appendVideoEmbed(parsed.videoQuery);
