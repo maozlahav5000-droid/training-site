@@ -198,13 +198,25 @@
             background: var(--bg-secondary); border: 1px solid var(--border-color);
         }
         .journal-entry-date { margin-bottom: 5px; color: #5eead4; font-size: 0.78rem; font-weight: 600; }
-        .journal-entry-text { padding-left: 28px; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.65; white-space: pre-wrap; }
-        .journal-entry-delete {
-            position: absolute; top: 9px; left: 9px; width: 26px; height: 26px;
+        .journal-entry-text { padding-left: 62px; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.65; white-space: pre-wrap; }
+        .journal-entry-actions {
+            position: absolute; top: 8px; left: 8px; display: flex; gap: 3px;
+        }
+        .journal-entry-action {
+            width: 27px; height: 27px;
             border: none; border-radius: 7px; background: transparent; color: var(--text-muted);
             cursor: pointer; font-size: 0.9rem;
         }
+        .journal-entry-edit:hover { background: rgba(45,212,191,0.12); color: #5eead4; }
         .journal-entry-delete:hover { background: rgba(255,82,82,0.12); color: var(--accent-red); }
+        .journal-entry-editing { border-color: rgba(45,212,191,0.35); }
+        .journal-edit-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+        .journal-edit-cancel {
+            padding: 9px 16px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+            background: transparent; color: var(--text-secondary); font-family: 'Heebo', sans-serif;
+            font-size: 0.88rem; font-weight: 600; cursor: pointer;
+        }
+        .journal-edit-cancel:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.22); }
         .journal-empty { margin-top: 12px; color: var(--text-muted); font-size: 0.84rem; }
 
         .day-header { margin-bottom: 20px; }
@@ -1299,6 +1311,8 @@ function switchTab(dayKey) {
 
 let journalRenderMap = {};
 let journalDeleteMap = {};
+let journalEditMap = {};
+let activeJournalEdit = null;
 
 function getExerciseJournal() {
     try {
@@ -1336,6 +1350,7 @@ function openNotesPage() {
 
 function closeNotesPage(event) {
     if (event && event.target !== event.currentTarget) return;
+    activeJournalEdit = null;
     document.getElementById('notes-modal').classList.remove('show');
     document.body.style.overflow = '';
     const activeDay = document.querySelector('.tab-btn.active')?.dataset.day || 'A';
@@ -1350,6 +1365,7 @@ function renderNotesPage(openJournalId) {
     const activeJournalId = openJournalId || program.A?.exercises?.[0]?.journalId;
     journalRenderMap = {};
     journalDeleteMap = {};
+    journalEditMap = {};
 
     const daySections = ['A','B','C','D','E'].map(dayKey => {
         const day = program[dayKey];
@@ -1358,17 +1374,38 @@ function renderNotesPage(openJournalId) {
             const journalId = exercise.journalId;
             const formId = `journal-form-${dayKey}-${exIdx}`;
             journalRenderMap[formId] = journalId;
-            const entries = [...(journal[journalId] || [])].sort((a, b) =>
-                String(b.date || '').localeCompare(String(a.date || '')) || Number(b.createdAt || 0) - Number(a.createdAt || 0)
+            const entries = (journal[journalId] || []).map((entry, storageIndex) => ({ entry, storageIndex })).sort((a, b) =>
+                String(b.entry.date || '').localeCompare(String(a.entry.date || '')) || Number(b.entry.createdAt || 0) - Number(a.entry.createdAt || 0)
             );
-            const entriesHtml = entries.length ? entries.map((entry, entryIdx) => {
+            const entriesHtml = entries.length ? entries.map(({ entry, storageIndex }, entryIdx) => {
                 const deleteToken = `journal-delete-${dayKey}-${exIdx}-${entryIdx}`;
-                journalDeleteMap[deleteToken] = { journalId, entryId: entry.id };
+                const editToken = `journal-edit-${dayKey}-${exIdx}-${entryIdx}`;
+                const target = { journalId, entryId: entry.id, entryIndex: storageIndex };
+                journalDeleteMap[deleteToken] = target;
+                journalEditMap[editToken] = target;
+                const isEditing = activeJournalEdit?.journalId === journalId &&
+                    (entry.id ? activeJournalEdit.entryId === entry.id : activeJournalEdit.entryIndex === storageIndex);
+                if (isEditing) {
+                    return `
+                        <div class="journal-entry journal-entry-editing">
+                            <div class="journal-form-row">
+                                <input class="journal-date-input" id="${editToken}-date" type="date" value="${escapeHtmlChat(String(entry.date || localTodayIso()))}" aria-label="עריכת תאריך ההערה">
+                                <textarea class="journal-textarea" id="${editToken}-text" aria-label="עריכת תוכן ההערה">${escapeHtmlChat(String(entry.text || ''))}</textarea>
+                            </div>
+                            <div class="journal-edit-actions">
+                                <button type="button" class="journal-edit-cancel" onclick="cancelJournalEntryEdit()">ביטול</button>
+                                <button type="button" class="journal-add-btn" onclick="saveJournalEntryEdit('${editToken}')">שמור שינויים</button>
+                            </div>
+                        </div>`;
+                }
                 return `
                     <div class="journal-entry">
                         <div class="journal-entry-date">${escapeHtmlChat(formatJournalDate(entry.date))}</div>
                         <div class="journal-entry-text">${escapeHtmlChat(String(entry.text || ''))}</div>
-                        <button type="button" class="journal-entry-delete" onclick="deleteJournalEntry('${deleteToken}')" title="מחק הערה" aria-label="מחק הערה">✕</button>
+                        <div class="journal-entry-actions">
+                            <button type="button" class="journal-entry-action journal-entry-edit" onclick="startJournalEntryEdit('${editToken}')" title="ערוך הערה" aria-label="ערוך הערה">✎</button>
+                            <button type="button" class="journal-entry-action journal-entry-delete" onclick="deleteJournalEntry('${deleteToken}')" title="מחק הערה" aria-label="מחק הערה">✕</button>
+                        </div>
                     </div>`;
             }).join('') : '<div class="journal-empty">עדיין אין הערות לתרגיל הזה.</div>';
             const countText = entries.length ? entries.length + ' הערות' : 'ללא הערות';
@@ -1435,12 +1472,69 @@ function addJournalEntry(formId) {
     showToast('ההערה נשמרה');
 }
 
+function findJournalEntryIndex(journal, target) {
+    const entries = journal[target?.journalId];
+    if (!Array.isArray(entries)) return -1;
+    if (target.entryId != null) {
+        const byId = entries.findIndex(entry => entry.id === target.entryId);
+        if (byId !== -1) return byId;
+    }
+    return Number.isInteger(target.entryIndex) && target.entryIndex >= 0 && target.entryIndex < entries.length
+        ? target.entryIndex
+        : -1;
+}
+
+function startJournalEntryEdit(editToken) {
+    const target = journalEditMap[editToken];
+    if (!target) return;
+    activeJournalEdit = { ...target };
+    renderNotesPage(target.journalId);
+    setTimeout(() => document.getElementById(editToken + '-text')?.focus(), 0);
+}
+
+function cancelJournalEntryEdit() {
+    const journalId = activeJournalEdit?.journalId;
+    activeJournalEdit = null;
+    renderNotesPage(journalId);
+}
+
+function saveJournalEntryEdit(editToken) {
+    const target = journalEditMap[editToken];
+    const dateInput = document.getElementById(editToken + '-date');
+    const textInput = document.getElementById(editToken + '-text');
+    const text = textInput?.value.trim() || '';
+    if (!target || !text) {
+        showToast('ההערה לא יכולה להיות ריקה');
+        textInput?.focus();
+        return;
+    }
+    const journal = getExerciseJournal();
+    const entryIndex = findJournalEntryIndex(journal, target);
+    if (entryIndex === -1) {
+        showToast('לא ניתן למצוא את ההערה');
+        return;
+    }
+    journal[target.journalId][entryIndex] = {
+        ...journal[target.journalId][entryIndex],
+        date: dateInput?.value || localTodayIso(),
+        text,
+        updatedAt: Date.now()
+    };
+    saveExerciseJournal(journal);
+    activeJournalEdit = null;
+    renderNotesPage(target.journalId);
+    showToast('השינויים נשמרו');
+}
+
 function deleteJournalEntry(deleteToken) {
     const target = journalDeleteMap[deleteToken];
     if (!target || !confirm('האם למחוק את ההערה?')) return;
     const journal = getExerciseJournal();
-    journal[target.journalId] = (journal[target.journalId] || []).filter(entry => entry.id !== target.entryId);
+    const entryIndex = findJournalEntryIndex(journal, target);
+    if (entryIndex === -1) return;
+    journal[target.journalId].splice(entryIndex, 1);
     if (journal[target.journalId].length === 0) delete journal[target.journalId];
+    activeJournalEdit = null;
     saveExerciseJournal(journal);
     renderNotesPage(target.journalId);
     showToast('ההערה נמחקה');
@@ -2255,7 +2349,8 @@ setupAiChat();
 
 document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && document.getElementById('notes-modal').classList.contains('show')) {
-        closeNotesPage(null);
+        if (activeJournalEdit) cancelJournalEntryEdit();
+        else closeNotesPage(null);
     }
 });
 
