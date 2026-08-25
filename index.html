@@ -104,6 +104,14 @@
         }
         .tab-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,0.03); }
         .tab-btn.active { color: #fff; font-weight: 600; box-shadow: var(--shadow-sm); }
+        .tab-day-label { display: inline-flex; align-items: center; gap: 4px; }
+        .tab-day-label bdi { unicode-bidi: isolate; }
+        .tab-btn small { margin-top: 2px; opacity: 0.76; }
+        .today-indicator {
+            display: none; margin-top: 5px; padding: 2px 7px; border-radius: 999px;
+            background: rgba(255,255,255,0.12); color: inherit; font-size: 0.68rem; line-height: 1.35;
+        }
+        .tab-btn.today .today-indicator { display: inline-flex; }
         .tab-btn[data-day="A"].active { background: var(--gradient-1); }
         .tab-btn[data-day="B"].active { background: var(--gradient-2); }
         .tab-btn[data-day="C"].active { background: var(--gradient-3); }
@@ -173,43 +181,14 @@
             color: var(--text-muted); font-size: 0.76rem;
         }
         .journal-exercise-body { padding: 0 16px 16px; border-top: 1px solid var(--border-color); }
-        .journal-form { padding-top: 14px; }
-        .journal-form-row { display: grid; grid-template-columns: 150px 1fr; gap: 10px; align-items: start; }
-        .journal-date-input,
-        .journal-textarea {
-            width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-sm);
-            background: var(--bg-primary); color: var(--text-primary); font-family: 'Heebo', sans-serif;
-            font-size: 0.9rem; outline: none;
-        }
-        .journal-date-input { padding: 11px 12px; color-scheme: dark; }
-        .journal-textarea { min-height: 82px; padding: 10px 12px; resize: vertical; line-height: 1.6; }
-        .journal-date-input:focus,
-        .journal-textarea:focus { border-color: #14b8a6; box-shadow: 0 0 0 3px rgba(20,184,166,0.12); }
-        .journal-form-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
+        .technique-notes-list { padding-top: 14px; }
+        .technique-empty { margin-bottom: 10px; color: var(--text-muted); font-size: 0.84rem; }
         .journal-add-btn {
             padding: 9px 16px; border: none; border-radius: var(--radius-sm);
             background: linear-gradient(135deg, #0891b2, #0d9488); color: #fff;
             font-family: 'Heebo', sans-serif; font-size: 0.88rem; font-weight: 600; cursor: pointer;
         }
         .journal-add-btn:hover { filter: brightness(1.08); }
-        .journal-entries { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
-        .journal-entry {
-            position: relative; padding: 12px 14px; border-radius: var(--radius-sm);
-            background: var(--bg-secondary); border: 1px solid var(--border-color);
-        }
-        .journal-entry-date { margin-bottom: 5px; color: #5eead4; font-size: 0.78rem; font-weight: 600; }
-        .journal-entry-text { padding-left: 62px; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.65; white-space: pre-wrap; }
-        .journal-entry-actions {
-            position: absolute; top: 8px; left: 8px; display: flex; gap: 3px;
-        }
-        .journal-entry-action {
-            width: 27px; height: 27px;
-            border: none; border-radius: 7px; background: transparent; color: var(--text-muted);
-            cursor: pointer; font-size: 0.9rem;
-        }
-        .journal-entry-edit:hover { background: rgba(45,212,191,0.12); color: #5eead4; }
-        .journal-entry-delete:hover { background: rgba(255,82,82,0.12); color: var(--accent-red); }
-        .journal-entry-editing { border-color: rgba(45,212,191,0.35); }
         .journal-edit-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
         .journal-edit-cancel {
             padding: 9px 16px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);
@@ -217,7 +196,80 @@
             font-size: 0.88rem; font-weight: 600; cursor: pointer;
         }
         .journal-edit-cancel:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.22); }
-        .journal-empty { margin-top: 12px; color: var(--text-muted); font-size: 0.84rem; }
+
+        .performance-log {
+            margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-color);
+        }
+        .performance-log-header {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            margin-bottom: 10px;
+        }
+        .performance-log-title {
+            display: flex; align-items: center; gap: 7px; color: var(--accent-cyan);
+            font-size: 0.92rem; font-weight: 700;
+        }
+        .performance-log-count {
+            padding: 4px 8px; border-radius: 999px; background: rgba(45,212,191,0.08);
+            color: var(--text-muted); font-size: 0.75rem;
+        }
+        .performance-form {
+            padding: 12px; border-radius: var(--radius-sm); background: rgba(8,145,178,0.05);
+            border: 1px solid rgba(45,212,191,0.14);
+        }
+        .performance-form-grid {
+            display: grid; grid-template-columns: minmax(145px, 0.9fr) minmax(155px, 0.8fr) minmax(100px, 0.55fr);
+            gap: 10px; align-items: start;
+        }
+        .performance-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+        .performance-field > span:first-child { color: var(--text-muted); font-size: 0.78rem; font-weight: 600; }
+        .performance-feeling-field { grid-column: 1 / -1; }
+        .performance-input,
+        .performance-select,
+        .performance-textarea {
+            width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+            background: var(--bg-primary); color: var(--text-primary); font-family: 'Heebo', sans-serif;
+            font-size: 0.9rem; outline: none;
+        }
+        .performance-input, .performance-select { min-height: 42px; padding: 9px 10px; }
+        .performance-input[type="date"], .performance-input[type="number"] { direction: ltr; unicode-bidi: isolate; }
+        .performance-textarea {
+            min-height: 70px; padding: 9px 11px; resize: vertical; line-height: 1.6;
+            unicode-bidi: plaintext; text-align: start;
+        }
+        .performance-input:focus,
+        .performance-select:focus,
+        .performance-textarea:focus { border-color: #14b8a6; box-shadow: 0 0 0 3px rgba(20,184,166,0.12); }
+        .performance-weight-control { display: grid; grid-template-columns: minmax(0, 1fr) 68px; gap: 6px; }
+        .performance-form-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
+        .performance-entries { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .performance-entry {
+            position: relative; padding: 12px 14px; border-radius: var(--radius-sm);
+            background: var(--bg-secondary); border: 1px solid var(--border-color);
+        }
+        .performance-entry.is-editing { border-color: rgba(45,212,191,0.35); }
+        .performance-entry-main { padding-inline-end: 62px; }
+        .performance-entry-meta {
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 7px;
+        }
+        .performance-entry-date { color: #5eead4; font-size: 0.8rem; font-weight: 700; direction: ltr; unicode-bidi: isolate; }
+        .performance-entry-stat {
+            padding: 3px 8px; border-radius: 999px; background: rgba(67,97,238,0.1);
+            color: var(--text-secondary); font-size: 0.78rem; unicode-bidi: isolate;
+        }
+        .performance-entry-feeling {
+            display: block; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.65;
+            white-space: pre-wrap; unicode-bidi: plaintext; text-align: start;
+        }
+        .performance-entry-actions {
+            position: absolute; top: 8px; inset-inline-end: 8px; display: flex; gap: 3px;
+        }
+        .performance-entry-action {
+            width: 27px; height: 27px; border: none; border-radius: 7px;
+            background: transparent; color: var(--text-muted); cursor: pointer; font-size: 0.9rem;
+        }
+        .performance-entry-edit:hover { background: rgba(45,212,191,0.12); color: #5eead4; }
+        .performance-entry-delete:hover { background: rgba(255,82,82,0.12); color: var(--accent-red); }
+        .performance-empty { color: var(--text-muted); font-size: 0.84rem; }
 
         .day-header { margin-bottom: 20px; }
         .day-header h2 { font-size: 1.65rem; font-weight: 700; margin-bottom: 4px; }
@@ -270,7 +322,7 @@
         .exercise-card.open .exercise-toggle { transform: rotate(180deg); }
 
         .exercise-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
-        .exercise-card.open .exercise-body { max-height: 1000px; }
+        .exercise-card.open .exercise-body { max-height: 10000px; }
 
         .exercise-body-inner { padding: 0 20px 16px; border-top: 1px solid var(--border-color); padding-top: 16px; }
 
@@ -351,7 +403,7 @@
             display: flex; align-items: center; gap: 8px;
             padding: 8px 12px; background: rgba(67,97,238,0.06);
             border-radius: var(--radius-sm); margin-bottom: 6px;
-            border-right: 3px solid var(--accent-blue);
+            border-inline-start: 3px solid var(--accent-blue);
         }
         .note-text-input {
             flex: 1; background: transparent; border: none;
@@ -562,7 +614,8 @@
             .notes-header-actions { width: 100%; justify-content: flex-end; }
             .notes-modal-overlay { padding: 0; align-items: stretch; }
             .notes-modal { width: 100%; max-height: 100vh; border-radius: 0; padding: 14px 12px 24px; }
-            .journal-form-row { grid-template-columns: 1fr; }
+            .performance-form-grid { grid-template-columns: 1fr; }
+            .performance-feeling-field { grid-column: auto; }
             .exercise-header { padding: 12px 14px; }
             .exercise-name { font-size: 1rem; }
             .set-row { flex-wrap: wrap; gap: 8px; }
@@ -735,7 +788,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 טיימר
             </button>
-            <button type="button" class="notes-trigger" onclick="openNotesPage()" title="יומן הערות" aria-label="פתח יומן הערות לתרגילים">
+            <button type="button" class="notes-trigger" onclick="openNotesPage()" title="יומן דגשי ביצוע" aria-label="פתח יומן דגשי ביצוע לתרגילים">
                 <span class="notes-trigger-icon" aria-hidden="true">✎</span>
                 יומן הערות
             </button>
@@ -783,11 +836,31 @@
         </section>
 
         <div class="tabs">
-            <button class="tab-btn active" data-day="A" onclick="switchTab('A')">יום A<br><small>חזה, כתפיים, יד אחורית</small></button>
-            <button class="tab-btn" data-day="B" onclick="switchTab('B')">יום B<br><small>גב, כתף אחורית, יד קדמית</small></button>
-            <button class="tab-btn" data-day="C" onclick="switchTab('C')">יום C<br><small>ירכיים, ישבן, תאומים</small></button>
-            <button class="tab-btn" data-day="D" onclick="switchTab('D')">יום D<br><small>חזה, גב, כתפיים, ידיים</small></button>
-            <button class="tab-btn" data-day="E" onclick="switchTab('E')">יום E<br><small>רגליים, תאומים</small></button>
+            <button class="tab-btn active" data-day="A" onclick="switchTab('A')">
+                <span class="tab-day-label">יום א׳ · <bdi dir="ltr">A</bdi></span>
+                <small>חזה, כתפיים, יד אחורית</small>
+                <span class="today-indicator">היום</span>
+            </button>
+            <button class="tab-btn" data-day="B" onclick="switchTab('B')">
+                <span class="tab-day-label">יום ב׳ · <bdi dir="ltr">B</bdi></span>
+                <small>גב, כתף אחורית, יד קדמית</small>
+                <span class="today-indicator">היום</span>
+            </button>
+            <button class="tab-btn" data-day="C" onclick="switchTab('C')">
+                <span class="tab-day-label">יום ג׳ · <bdi dir="ltr">C</bdi></span>
+                <small>ירכיים, ישבן, תאומים</small>
+                <span class="today-indicator">היום</span>
+            </button>
+            <button class="tab-btn" data-day="D" onclick="switchTab('D')">
+                <span class="tab-day-label">יום ד׳ · <bdi dir="ltr">D</bdi></span>
+                <small>חזה, גב, כתפיים, ידיים</small>
+                <span class="today-indicator">היום</span>
+            </button>
+            <button class="tab-btn" data-day="E" onclick="switchTab('E')">
+                <span class="tab-day-label">יום ה׳ · <bdi dir="ltr">E</bdi></span>
+                <small>רגליים, תאומים</small>
+                <span class="today-indicator">היום</span>
+            </button>
         </div>
 
         <div id="day-A" class="tab-content active" data-day="A"></div>
@@ -1103,6 +1176,10 @@ function ensureExerciseJournalIds(program) {
                 exercise.journalId = makeExerciseJournalId(dayKey);
                 changed = true;
             }
+            if (!Array.isArray(exercise.notes)) {
+                exercise.notes = [];
+                changed = true;
+            }
         });
     });
     if (changed) {
@@ -1186,6 +1263,125 @@ function badgeText(exercise) {
     return exercise.groups.map(g => `${g.sets}×${g.reps}`).join(' + ');
 }
 
+let activePerformanceEdit = null;
+
+function performanceFeeling(entry) {
+    return String(entry?.feeling ?? entry?.text ?? '');
+}
+
+function safePerformanceDate(value, fallback = localTodayIso()) {
+    const date = String(value || '');
+    return /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : fallback;
+}
+
+function performanceCountText(count) {
+    if (count === 0) return 'אין רשומות';
+    if (count === 1) return 'רשומה אחת';
+    return `${count} רשומות`;
+}
+
+function performanceFieldsHtml(prefix, entry = {}) {
+    const unit = entry.unit === 'lbs' ? 'lbs' : 'kg';
+    const weight = entry.weight == null ? '' : String(entry.weight);
+    const reps = entry.reps == null ? '' : String(entry.reps);
+    return `
+        <div class="performance-form-grid">
+            <label class="performance-field">
+                <span>תאריך</span>
+                <input class="performance-input" id="${prefix}-date" type="date" dir="ltr"
+                       value="${escapeHtmlAttr(safePerformanceDate(entry.date))}" aria-label="תאריך הביצוע">
+            </label>
+            <label class="performance-field">
+                <span>משקל</span>
+                <span class="performance-weight-control">
+                    <input class="performance-input" id="${prefix}-weight" type="number" dir="ltr"
+                           value="${escapeHtmlAttr(weight)}" min="0" step="0.5" placeholder="0" aria-label="משקל שבוצע">
+                    <select class="performance-select" id="${prefix}-unit" dir="ltr" aria-label="יחידת משקל">
+                        <option value="kg" ${unit === 'kg' ? 'selected' : ''}>ק״ג</option>
+                        <option value="lbs" ${unit === 'lbs' ? 'selected' : ''}>lbs</option>
+                    </select>
+                </span>
+            </label>
+            <label class="performance-field">
+                <span>חזרות</span>
+                <input class="performance-input" id="${prefix}-reps" type="number" dir="ltr"
+                       value="${escapeHtmlAttr(reps)}" min="1" step="1" placeholder="0" aria-label="מספר חזרות שבוצעו">
+            </label>
+            <label class="performance-field performance-feeling-field">
+                <span>איך הרגיש התרגיל?</span>
+                <textarea class="performance-textarea" id="${prefix}-feeling" dir="auto"
+                          placeholder="לדוגמה: הרגיש יציב, מאתגר בסוף הטווח...">${escapeHtmlChat(performanceFeeling(entry))}</textarea>
+            </label>
+        </div>`;
+}
+
+function renderPerformanceLog(dayKey, exIdx, exercise) {
+    const journal = getExerciseJournal();
+    const entries = (journal[exercise.journalId] || [])
+        .map((entry, storageIndex) => ({ entry, storageIndex }))
+        .sort((a, b) => String(b.entry.date || '').localeCompare(String(a.entry.date || '')) ||
+            Number(b.entry.createdAt || 0) - Number(a.entry.createdAt || 0));
+    const formPrefix = `performance-${dayKey}-${exIdx}`;
+    const entriesHtml = entries.length ? entries.map(({ entry, storageIndex }) => {
+        const editPrefix = `${formPrefix}-edit-${storageIndex}`;
+        const isEditing = activePerformanceEdit?.journalId === exercise.journalId &&
+            (entry.id ? activePerformanceEdit.entryId === entry.id : activePerformanceEdit.entryIndex === storageIndex);
+        if (isEditing) {
+            return `
+                <div class="performance-entry is-editing">
+                    ${performanceFieldsHtml(editPrefix, entry)}
+                    <div class="journal-edit-actions">
+                        <button type="button" class="journal-edit-cancel" onclick="cancelPerformanceEdit()">ביטול</button>
+                        <button type="button" class="journal-add-btn" onclick="savePerformanceEdit('${dayKey}', ${exIdx}, ${storageIndex}, '${editPrefix}')">שמור שינויים</button>
+                    </div>
+                </div>`;
+        }
+        const weightHtml = entry.weight !== '' && entry.weight != null
+            ? entry.unit === 'lbs'
+                ? `<span class="performance-entry-stat"><bdi dir="ltr">${escapeHtmlChat(String(entry.weight))} lbs</bdi></span>`
+                : `<span class="performance-entry-stat"><bdi dir="ltr">${escapeHtmlChat(String(entry.weight))}</bdi> ק״ג</span>`
+            : '';
+        const repsHtml = entry.reps !== '' && entry.reps != null
+            ? `<span class="performance-entry-stat"><bdi dir="ltr">${escapeHtmlChat(String(entry.reps))}</bdi> חזרות</span>`
+            : '';
+        const feeling = performanceFeeling(entry);
+        return `
+            <div class="performance-entry">
+                <div class="performance-entry-main">
+                    <div class="performance-entry-meta">
+                        <span class="performance-entry-date">${escapeHtmlChat(formatJournalDate(entry.date))}</span>
+                        ${weightHtml}${repsHtml}
+                    </div>
+                    ${feeling ? `<bdi class="performance-entry-feeling">${escapeHtmlChat(feeling)}</bdi>` : ''}
+                </div>
+                <div class="performance-entry-actions">
+                    <button type="button" class="performance-entry-action performance-entry-edit"
+                            onclick="startPerformanceEdit('${dayKey}', ${exIdx}, ${storageIndex})" title="ערוך רשומה" aria-label="ערוך רשומת ביצוע">✎</button>
+                    <button type="button" class="performance-entry-action performance-entry-delete"
+                            onclick="deletePerformanceEntry('${dayKey}', ${exIdx}, ${storageIndex})" title="מחק רשומה" aria-label="מחק רשומת ביצוע">✕</button>
+                </div>
+            </div>`;
+    }).join('') : '<div class="performance-empty">עדיין אין ביצועים מתועדים לתרגיל הזה.</div>';
+
+    return `
+        <section class="performance-log" aria-label="יומן ביצועים">
+            <div class="performance-log-header">
+                <div class="performance-log-title">
+                    <span aria-hidden="true">◷</span>
+                    יומן ביצועים
+                </div>
+                <span class="performance-log-count">${performanceCountText(entries.length)}</span>
+            </div>
+            <div class="performance-form">
+                ${performanceFieldsHtml(formPrefix, { unit: getUnitForWeight(weightId(dayKey, exIdx, 0)) })}
+                <div class="performance-form-actions">
+                    <button type="button" class="journal-add-btn" onclick="addPerformanceEntry('${dayKey}', ${exIdx}, '${formPrefix}')">הוסף ביצוע</button>
+                </div>
+            </div>
+            <div class="performance-entries">${entriesHtml}</div>
+        </section>`;
+}
+
 function renderDay(dayKey) {
     const program = getProgram();
     const day = program[dayKey];
@@ -1258,30 +1454,7 @@ function renderDay(dayKey) {
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                         הוסף שורת סטים
                     </button>
-                    <div class="notes-section">
-                        <div class="notes-title">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                            הערות
-                        </div>
-        `;
-
-        exercise.notes.forEach((note, noteIdx) => {
-            html += `
-                <div class="note-item">
-                    <input type="text" class="note-text-input" value="${note}"
-                           onchange="updateNote('${dayKey}', ${exIdx}, ${noteIdx}, this.value)"
-                           placeholder="כתוב הערה...">
-                    <button class="note-delete-btn" onclick="removeNote('${dayKey}', ${exIdx}, ${noteIdx})" title="מחק הערה">✕</button>
-                </div>
-            `;
-        });
-
-        html += `
-                        <button class="add-note-btn" onclick="addNote('${dayKey}', ${exIdx})">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                            הוסף הערה
-                        </button>
-                    </div>
+                    ${renderPerformanceLog(dayKey, exIdx, exercise)}
                 </div>
             </div>
         </div>
@@ -1298,7 +1471,22 @@ function renderDay(dayKey) {
     container.innerHTML = html;
 }
 
-function switchTab(dayKey) {
+const WORKOUT_DAY_BY_WEEKDAY = Object.freeze({ 0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E' });
+
+function workoutDayForDate(date = new Date()) {
+    return WORKOUT_DAY_BY_WEEKDAY[date.getDay()] || null;
+}
+
+function markTodayWorkout(dayKey) {
+    document.querySelectorAll('.tab-btn').forEach(button => {
+        const isToday = Boolean(dayKey) && button.dataset.day === dayKey;
+        button.classList.toggle('today', isToday);
+        if (isToday) button.setAttribute('aria-current', 'date');
+        else button.removeAttribute('aria-current');
+    });
+}
+
+function switchTab(dayKey, updateHash = true) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     const tabButton = document.querySelector(`.tab-btn[data-day="${dayKey}"]`);
@@ -1306,23 +1494,26 @@ function switchTab(dayKey) {
     if (!tabButton || !tabContent) return;
     tabButton.classList.add('active');
     tabContent.classList.add('active');
-    if (history.replaceState) history.replaceState(null, '', '#day-' + dayKey);
+    if (updateHash && history.replaceState) history.replaceState(null, '', '#day-' + dayKey);
 }
 
-let journalRenderMap = {};
-let journalDeleteMap = {};
-let journalEditMap = {};
-let activeJournalEdit = null;
+function normalizeExerciseJournal(data) {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return {};
+    const normalized = {};
+    Object.entries(data).forEach(([journalId, entries]) => {
+        if (!Array.isArray(entries)) return;
+        normalized[journalId] = entries.filter(entry => entry && typeof entry === 'object' && !Array.isArray(entry));
+    });
+    return normalized;
+}
 
 function getExerciseJournal() {
-    try {
-        const data = JSON.parse(localStorage.getItem(EXERCISE_JOURNAL_KEY));
-        return data && typeof data === 'object' && !Array.isArray(data) ? data : {};
-    } catch { return {}; }
+    try { return normalizeExerciseJournal(JSON.parse(localStorage.getItem(EXERCISE_JOURNAL_KEY))); }
+    catch { return {}; }
 }
 
 function saveExerciseJournal(journal) {
-    localStorage.setItem(EXERCISE_JOURNAL_KEY, JSON.stringify(journal));
+    localStorage.setItem(EXERCISE_JOURNAL_KEY, JSON.stringify(normalizeExerciseJournal(journal)));
 }
 
 function localTodayIso() {
@@ -1350,82 +1541,54 @@ function openNotesPage() {
 
 function closeNotesPage(event) {
     if (event && event.target !== event.currentTarget) return;
-    activeJournalEdit = null;
+    if (document.activeElement?.closest?.('#notes-modal')) document.activeElement.blur();
     document.getElementById('notes-modal').classList.remove('show');
     document.body.style.overflow = '';
     const activeDay = document.querySelector('.tab-btn.active')?.dataset.day || 'A';
     if (history.replaceState) history.replaceState(null, '', '#day-' + activeDay);
 }
 
+function techniqueCountText(count) {
+    if (count === 0) return 'ללא דגשים';
+    if (count === 1) return 'דגש אחד';
+    return `${count} דגשים`;
+}
+
 function renderNotesPage(openJournalId) {
     const container = document.getElementById('exercise-notes-page');
     if (!container) return;
     const program = getProgram();
-    const journal = getExerciseJournal();
     const activeJournalId = openJournalId || program.A?.exercises?.[0]?.journalId;
-    journalRenderMap = {};
-    journalDeleteMap = {};
-    journalEditMap = {};
 
     const daySections = ['A','B','C','D','E'].map(dayKey => {
         const day = program[dayKey];
         if (!day) return '';
         const exercises = day.exercises.map((exercise, exIdx) => {
             const journalId = exercise.journalId;
-            const formId = `journal-form-${dayKey}-${exIdx}`;
-            journalRenderMap[formId] = journalId;
-            const entries = (journal[journalId] || []).map((entry, storageIndex) => ({ entry, storageIndex })).sort((a, b) =>
-                String(b.entry.date || '').localeCompare(String(a.entry.date || '')) || Number(b.entry.createdAt || 0) - Number(a.entry.createdAt || 0)
-            );
-            const entriesHtml = entries.length ? entries.map(({ entry, storageIndex }, entryIdx) => {
-                const deleteToken = `journal-delete-${dayKey}-${exIdx}-${entryIdx}`;
-                const editToken = `journal-edit-${dayKey}-${exIdx}-${entryIdx}`;
-                const target = { journalId, entryId: entry.id, entryIndex: storageIndex };
-                journalDeleteMap[deleteToken] = target;
-                journalEditMap[editToken] = target;
-                const isEditing = activeJournalEdit?.journalId === journalId &&
-                    (entry.id ? activeJournalEdit.entryId === entry.id : activeJournalEdit.entryIndex === storageIndex);
-                if (isEditing) {
-                    return `
-                        <div class="journal-entry journal-entry-editing">
-                            <div class="journal-form-row">
-                                <input class="journal-date-input" id="${editToken}-date" type="date" value="${escapeHtmlChat(String(entry.date || localTodayIso()))}" aria-label="עריכת תאריך ההערה">
-                                <textarea class="journal-textarea" id="${editToken}-text" aria-label="עריכת תוכן ההערה">${escapeHtmlChat(String(entry.text || ''))}</textarea>
-                            </div>
-                            <div class="journal-edit-actions">
-                                <button type="button" class="journal-edit-cancel" onclick="cancelJournalEntryEdit()">ביטול</button>
-                                <button type="button" class="journal-add-btn" onclick="saveJournalEntryEdit('${editToken}')">שמור שינויים</button>
-                            </div>
-                        </div>`;
-                }
-                return `
-                    <div class="journal-entry">
-                        <div class="journal-entry-date">${escapeHtmlChat(formatJournalDate(entry.date))}</div>
-                        <div class="journal-entry-text">${escapeHtmlChat(String(entry.text || ''))}</div>
-                        <div class="journal-entry-actions">
-                            <button type="button" class="journal-entry-action journal-entry-edit" onclick="startJournalEntryEdit('${editToken}')" title="ערוך הערה" aria-label="ערוך הערה">✎</button>
-                            <button type="button" class="journal-entry-action journal-entry-delete" onclick="deleteJournalEntry('${deleteToken}')" title="מחק הערה" aria-label="מחק הערה">✕</button>
-                        </div>
-                    </div>`;
-            }).join('') : '<div class="journal-empty">עדיין אין הערות לתרגיל הזה.</div>';
-            const countText = entries.length ? entries.length + ' הערות' : 'ללא הערות';
+            const notes = Array.isArray(exercise.notes) ? exercise.notes : [];
+            const notesHtml = notes.length ? notes.map((note, noteIdx) => `
+                <div class="note-item">
+                    <input type="text" class="note-text-input" id="technique-note-${dayKey}-${exIdx}-${noteIdx}"
+                           value="${escapeHtmlAttr(String(note))}" dir="auto"
+                           onchange="updateTechniqueNote('${dayKey}', ${exIdx}, ${noteIdx}, this.value)"
+                           placeholder="לדוגמה: לשמור על גב ניטרלי..." aria-label="דגש ביצוע">
+                    <button type="button" class="note-delete-btn" onclick="removeTechniqueNote('${dayKey}', ${exIdx}, ${noteIdx})"
+                            title="מחק דגש" aria-label="מחק דגש ביצוע">✕</button>
+                </div>`).join('') : '<div class="technique-empty">עדיין אין דגשי ביצוע לתרגיל הזה.</div>';
             return `
                 <details class="journal-exercise" ${journalId === activeJournalId ? 'open' : ''}>
                     <summary>
                         <span class="journal-exercise-name">${escapeHtmlChat(exercise.name)}</span>
-                        <span class="journal-note-count">${countText}</span>
+                        <span class="journal-note-count">${techniqueCountText(notes.length)}</span>
                     </summary>
                     <div class="journal-exercise-body">
-                        <div class="journal-form">
-                            <div class="journal-form-row">
-                                <input class="journal-date-input" id="${formId}-date" type="date" value="${localTodayIso()}" aria-label="תאריך ההערה">
-                                <textarea class="journal-textarea" id="${formId}-text" placeholder="איך הרגיש התרגיל? טכניקה, כאב, משקל או כל דבר שחשוב לזכור..."></textarea>
-                            </div>
-                            <div class="journal-form-actions">
-                                <button type="button" class="journal-add-btn" onclick="addJournalEntry('${formId}')">הוסף הערה</button>
-                            </div>
+                        <div class="technique-notes-list">
+                            ${notesHtml}
+                            <button type="button" class="add-note-btn" onclick="addTechniqueNote('${dayKey}', ${exIdx})">
+                                <span aria-hidden="true">＋</span>
+                                הוסף דגש ביצוע
+                            </button>
                         </div>
-                        <div class="journal-entries">${entriesHtml}</div>
                     </div>
                 </details>`;
         }).join('');
@@ -1439,8 +1602,8 @@ function renderNotesPage(openJournalId) {
     container.innerHTML = `
         <div class="notes-page-header">
             <div>
-                <h2 id="notes-page-title">יומן הערות לתרגילים</h2>
-                <p>פתח תרגיל, בחר תאריך ורשום מה חשוב לזכור לאימון הבא.</p>
+                <h2 id="notes-page-title">יומן דגשי ביצוע</h2>
+                <p>כאן נשמרים הדגשים שלך לביצוע נכון של כל תרגיל.</p>
             </div>
             <div class="notes-header-actions">
                 <button type="button" class="notes-close-btn" onclick="closeNotesPage(null)" aria-label="סגור יומן הערות">✕</button>
@@ -1449,27 +1612,67 @@ function renderNotesPage(openJournalId) {
         ${daySections}`;
 }
 
-function addJournalEntry(formId) {
-    const journalId = journalRenderMap[formId];
-    const dateInput = document.getElementById(formId + '-date');
-    const textInput = document.getElementById(formId + '-text');
-    const text = textInput?.value.trim() || '';
-    if (!journalId || !text) {
-        showToast('כתוב הערה לפני השמירה');
-        textInput?.focus();
-        return;
+function updateTechniqueNote(dayKey, exIdx, noteIdx, newText) {
+    const program = getProgram();
+    program[dayKey].exercises[exIdx].notes[noteIdx] = newText;
+    saveProgram(program);
+}
+
+function addTechniqueNote(dayKey, exIdx) {
+    const program = getProgram();
+    const exercise = program[dayKey].exercises[exIdx];
+    exercise.notes.push('');
+    saveProgram(program);
+    renderNotesPage(exercise.journalId);
+    const noteIdx = exercise.notes.length - 1;
+    setTimeout(() => document.getElementById(`technique-note-${dayKey}-${exIdx}-${noteIdx}`)?.focus(), 0);
+}
+
+function removeTechniqueNote(dayKey, exIdx, noteIdx) {
+    if (!confirm('האם למחוק את דגש הביצוע?')) return;
+    const program = getProgram();
+    const exercise = program[dayKey].exercises[exIdx];
+    exercise.notes.splice(noteIdx, 1);
+    saveProgram(program);
+    renderNotesPage(exercise.journalId);
+    showToast('דגש הביצוע נמחק');
+}
+
+function readPerformanceForm(prefix) {
+    const dateInput = document.getElementById(prefix + '-date');
+    const weightInput = document.getElementById(prefix + '-weight');
+    const unitInput = document.getElementById(prefix + '-unit');
+    const repsInput = document.getElementById(prefix + '-reps');
+    const feelingInput = document.getElementById(prefix + '-feeling');
+    const weightRaw = weightInput?.value.trim() || '';
+    const repsRaw = repsInput?.value.trim() || '';
+    const feeling = feelingInput?.value.trim() || '';
+    const weight = weightRaw === '' ? '' : Number(weightRaw);
+    const reps = repsRaw === '' ? '' : Number(repsRaw);
+
+    if (weightRaw !== '' && (!Number.isFinite(weight) || weight < 0)) {
+        showToast('יש להזין משקל תקין');
+        weightInput?.focus();
+        return null;
     }
-    const journal = getExerciseJournal();
-    if (!Array.isArray(journal[journalId])) journal[journalId] = [];
-    journal[journalId].push({
-        id: globalThis.crypto?.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2),
-        date: dateInput?.value || localTodayIso(),
-        text,
-        createdAt: Date.now()
-    });
-    saveExerciseJournal(journal);
-    renderNotesPage(journalId);
-    showToast('ההערה נשמרה');
+    if (repsRaw !== '' && (!Number.isInteger(reps) || reps < 1)) {
+        showToast('יש להזין מספר חזרות תקין');
+        repsInput?.focus();
+        return null;
+    }
+    if (!feeling && weight === '' && reps === '') {
+        showToast('יש למלא תחושה, משקל או חזרות');
+        feelingInput?.focus();
+        return null;
+    }
+    return {
+        date: safePerformanceDate(dateInput?.value),
+        feeling,
+        text: feeling,
+        weight,
+        reps,
+        unit: unitInput?.value === 'lbs' ? 'lbs' : 'kg'
+    };
 }
 
 function findJournalEntryIndex(journal, target) {
@@ -1484,60 +1687,90 @@ function findJournalEntryIndex(journal, target) {
         : -1;
 }
 
-function startJournalEntryEdit(editToken) {
-    const target = journalEditMap[editToken];
-    if (!target) return;
-    activeJournalEdit = { ...target };
-    renderNotesPage(target.journalId);
-    setTimeout(() => document.getElementById(editToken + '-text')?.focus(), 0);
+function refreshPerformanceExercise(dayKey, exIdx, focusId) {
+    renderDay(dayKey);
+    reopenCard(dayKey, exIdx, () => {
+        if (focusId) document.getElementById(focusId)?.focus();
+    });
 }
 
-function cancelJournalEntryEdit() {
-    const journalId = activeJournalEdit?.journalId;
-    activeJournalEdit = null;
-    renderNotesPage(journalId);
-}
-
-function saveJournalEntryEdit(editToken) {
-    const target = journalEditMap[editToken];
-    const dateInput = document.getElementById(editToken + '-date');
-    const textInput = document.getElementById(editToken + '-text');
-    const text = textInput?.value.trim() || '';
-    if (!target || !text) {
-        showToast('ההערה לא יכולה להיות ריקה');
-        textInput?.focus();
-        return;
-    }
+function addPerformanceEntry(dayKey, exIdx, prefix) {
+    const data = readPerformanceForm(prefix);
+    if (!data) return;
+    const exercise = getProgram()[dayKey].exercises[exIdx];
     const journal = getExerciseJournal();
-    const entryIndex = findJournalEntryIndex(journal, target);
-    if (entryIndex === -1) {
-        showToast('לא ניתן למצוא את ההערה');
+    if (!Array.isArray(journal[exercise.journalId])) journal[exercise.journalId] = [];
+    journal[exercise.journalId].push({
+        id: globalThis.crypto?.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2),
+        ...data,
+        createdAt: Date.now()
+    });
+    saveExerciseJournal(journal);
+    refreshPerformanceExercise(dayKey, exIdx);
+    showToast('הביצוע נשמר');
+}
+
+function startPerformanceEdit(dayKey, exIdx, entryIndex) {
+    const exercise = getProgram()[dayKey].exercises[exIdx];
+    const entry = getExerciseJournal()[exercise.journalId]?.[entryIndex];
+    if (!entry) return;
+    activePerformanceEdit = {
+        dayKey, exIdx, journalId: exercise.journalId,
+        entryId: entry.id, entryIndex
+    };
+    const editPrefix = `performance-${dayKey}-${exIdx}-edit-${entryIndex}`;
+    refreshPerformanceExercise(dayKey, exIdx, editPrefix + '-feeling');
+}
+
+function cancelPerformanceEdit() {
+    if (!activePerformanceEdit) return;
+    const { dayKey, exIdx } = activePerformanceEdit;
+    activePerformanceEdit = null;
+    refreshPerformanceExercise(dayKey, exIdx);
+}
+
+function savePerformanceEdit(dayKey, exIdx, entryIndex, prefix) {
+    const data = readPerformanceForm(prefix);
+    if (!data) return;
+    const exercise = getProgram()[dayKey].exercises[exIdx];
+    const journal = getExerciseJournal();
+    const target = activePerformanceEdit?.journalId === exercise.journalId
+        ? activePerformanceEdit
+        : { journalId: exercise.journalId, entryIndex };
+    const resolvedIndex = findJournalEntryIndex(journal, target);
+    if (resolvedIndex === -1) {
+        showToast('לא ניתן למצוא את הרשומה');
         return;
     }
-    journal[target.journalId][entryIndex] = {
-        ...journal[target.journalId][entryIndex],
-        date: dateInput?.value || localTodayIso(),
-        text,
+    journal[exercise.journalId][resolvedIndex] = {
+        ...journal[exercise.journalId][resolvedIndex],
+        ...data,
         updatedAt: Date.now()
     };
     saveExerciseJournal(journal);
-    activeJournalEdit = null;
-    renderNotesPage(target.journalId);
+    activePerformanceEdit = null;
+    refreshPerformanceExercise(dayKey, exIdx);
     showToast('השינויים נשמרו');
 }
 
-function deleteJournalEntry(deleteToken) {
-    const target = journalDeleteMap[deleteToken];
-    if (!target || !confirm('האם למחוק את ההערה?')) return;
+function deletePerformanceEntry(dayKey, exIdx, entryIndex) {
+    if (!confirm('האם למחוק את רשומת הביצוע?')) return;
+    const exercise = getProgram()[dayKey].exercises[exIdx];
     const journal = getExerciseJournal();
-    const entryIndex = findJournalEntryIndex(journal, target);
-    if (entryIndex === -1) return;
-    journal[target.journalId].splice(entryIndex, 1);
-    if (journal[target.journalId].length === 0) delete journal[target.journalId];
-    activeJournalEdit = null;
+    const entry = journal[exercise.journalId]?.[entryIndex];
+    if (!entry) return;
+    const resolvedIndex = findJournalEntryIndex(journal, {
+        journalId: exercise.journalId,
+        entryId: entry.id,
+        entryIndex
+    });
+    if (resolvedIndex === -1) return;
+    journal[exercise.journalId].splice(resolvedIndex, 1);
+    if (journal[exercise.journalId].length === 0) delete journal[exercise.journalId];
+    activePerformanceEdit = null;
     saveExerciseJournal(journal);
-    renderNotesPage(target.journalId);
-    showToast('ההערה נמחקה');
+    refreshPerformanceExercise(dayKey, exIdx);
+    showToast('רשומת הביצוע נמחקה');
 }
 
 function toggleExercise(header) {
@@ -1602,24 +1835,6 @@ function removeGroup(dayKey, exIdx, grpIdx) {
     reopenCard(dayKey, exIdx);
 }
 
-function updateNote(dayKey, exIdx, noteIdx, newText) {
-    const program = getProgram();
-    program[dayKey].exercises[exIdx].notes[noteIdx] = newText;
-    saveProgram(program);
-}
-
-function addNote(dayKey, exIdx) {
-    const program = getProgram();
-    program[dayKey].exercises[exIdx].notes.push('');
-    saveProgram(program);
-    renderDay(dayKey);
-    reopenCard(dayKey, exIdx, () => {
-        const cards = document.querySelectorAll(`#day-${dayKey} .exercise-card`);
-        const inputs = cards[exIdx]?.querySelectorAll('.note-text-input');
-        if (inputs?.length) inputs[inputs.length - 1].focus();
-    });
-}
-
 function addExercise(dayKey) {
     const program = getProgram();
     program[dayKey].exercises.push({
@@ -1645,13 +1860,14 @@ function removeExercise(dayKey, exIdx) {
     const program = getProgram();
     const removedExercise = program[dayKey].exercises[exIdx];
     const name = removedExercise.name;
-    if (!confirm(`האם להסיר את התרגיל "${name}"?`)) return;
+    if (!confirm(`האם להסיר את התרגיל "${name}"? דגשי הביצוע ויומן הביצועים שלו יימחקו.`)) return;
     program[dayKey].exercises.splice(exIdx, 1);
     saveProgram(program);
     if (removedExercise.journalId) {
         const journal = getExerciseJournal();
         delete journal[removedExercise.journalId];
         saveExerciseJournal(journal);
+        if (activePerformanceEdit?.journalId === removedExercise.journalId) activePerformanceEdit = null;
     }
     const weights = getWeights();
     const keysToRemove = Object.keys(weights).filter(k => k.startsWith(`${dayKey}_${exIdx}_`));
@@ -1659,15 +1875,6 @@ function removeExercise(dayKey, exIdx) {
     saveWeightsData(weights);
     renderDay(dayKey);
     showToast('התרגיל הוסר');
-}
-
-function removeNote(dayKey, exIdx, noteIdx) {
-    if (!confirm('האם למחוק את ההערה?')) return;
-    const program = getProgram();
-    program[dayKey].exercises[exIdx].notes.splice(noteIdx, 1);
-    saveProgram(program);
-    renderDay(dayKey);
-    reopenCard(dayKey, exIdx);
 }
 
 function reopenCard(dayKey, exIdx, callback) {
@@ -1701,7 +1908,8 @@ function clearCurrentWeights() {
 }
 
 function resetProgram() {
-    if (!confirm('האם לשחזר את התוכנית המקורית? כל השינויים ויומן ההערות לתרגילים יימחקו.')) return;
+    if (!confirm('האם לשחזר את התוכנית המקורית? כל השינויים האישיים ויומן הביצועים יימחקו; דגשי ברירת המחדל ישוחזרו.')) return;
+    activePerformanceEdit = null;
     localStorage.removeItem(PROGRAM_KEY);
     localStorage.removeItem(EXERCISE_JOURNAL_KEY);
     ['A','B','C','D','E'].forEach(renderDay);
@@ -1869,6 +2077,7 @@ function closeTimerPanel(event) {
 
 function exportData() {
     const data = {
+        backupVersion: 2,
         program: getProgram(),
         weights: getWeights(),
         history: getHistory(),
@@ -1930,9 +2139,13 @@ resizeGeneralNotes(generalNotesEl);
 ['A','B','C','D','E'].forEach(renderDay);
 timerRemaining = getTimerPresets()[0] || 90;
 updateTimerDisplay();
-const initialTabMatch = location.hash.match(/^#day-([A-E])$/);
-if (initialTabMatch) switchTab(initialTabMatch[1]);
-if (location.hash === '#notes') openNotesPage();
+const initialHash = location.hash;
+const initialTabMatch = initialHash.match(/^#day-([A-E])$/);
+const todayWorkoutDay = workoutDayForDate();
+markTodayWorkout(todayWorkoutDay);
+if (initialTabMatch) switchTab(initialTabMatch[1], false);
+else if (todayWorkoutDay) switchTab(todayWorkoutDay, false);
+if (initialHash === '#notes') openNotesPage();
 
 const NVIDIA_KEY_STORAGE = 'training_nvidia_key';
 const NVIDIA_MODEL_STORAGE = 'training_nvidia_claude_model';
@@ -2008,6 +2221,10 @@ function escapeHtmlChat(str) {
     const d = document.createElement('div');
     d.textContent = str;
     return d.innerHTML;
+}
+
+function escapeHtmlAttr(str) {
+    return escapeHtmlChat(String(str)).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 function setupAiChat() {
@@ -2348,9 +2565,11 @@ function changeVideo(btn, direction) {
 setupAiChat();
 
 document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && document.getElementById('notes-modal').classList.contains('show')) {
-        if (activeJournalEdit) cancelJournalEntryEdit();
-        else closeNotesPage(null);
+    if (event.key !== 'Escape') return;
+    if (document.getElementById('notes-modal').classList.contains('show')) {
+        closeNotesPage(null);
+    } else if (activePerformanceEdit) {
+        cancelPerformanceEdit();
     }
 });
 
