@@ -216,6 +216,10 @@
             padding: 12px; border-radius: var(--radius-sm); background: rgba(8,145,178,0.05);
             border: 1px solid rgba(45,212,191,0.14);
         }
+        .performance-form[hidden], .performance-add-launch[hidden] { display: none; }
+        .performance-add-launch { display: flex; justify-content: flex-start; }
+        .performance-add-toggle { display: inline-flex; align-items: center; gap: 6px; }
+        .performance-add-toggle span { font-size: 1rem; line-height: 1; }
         .performance-form-grid {
             display: grid; grid-template-columns: minmax(145px, 0.9fr) minmax(155px, 0.8fr) minmax(100px, 0.55fr);
             gap: 10px; align-items: start;
@@ -240,7 +244,7 @@
         .performance-select:focus,
         .performance-textarea:focus { border-color: #14b8a6; box-shadow: 0 0 0 3px rgba(20,184,166,0.12); }
         .performance-weight-control { display: grid; grid-template-columns: minmax(0, 1fr) 68px; gap: 6px; }
-        .performance-form-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
+        .performance-form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
         .performance-entries { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
         .performance-entry {
             position: relative; padding: 12px 14px; border-radius: var(--radius-sm);
@@ -1372,10 +1376,19 @@ function renderPerformanceLog(dayKey, exIdx, exercise) {
                 </div>
                 <span class="performance-log-count">${performanceCountText(entries.length)}</span>
             </div>
-            <div class="performance-form">
+            <div class="performance-add-launch" id="${formPrefix}-launcher">
+                <button type="button" class="journal-add-btn performance-add-toggle" id="${formPrefix}-open"
+                        aria-expanded="false" aria-controls="${formPrefix}-form"
+                        onclick="openPerformanceForm('${formPrefix}')">
+                    <span aria-hidden="true">＋</span>
+                    הוסף ביצוע
+                </button>
+            </div>
+            <div class="performance-form" id="${formPrefix}-form" role="group" aria-label="הוספת ביצוע" hidden>
                 ${performanceFieldsHtml(formPrefix, { unit: getUnitForWeight(weightId(dayKey, exIdx, 0)) })}
                 <div class="performance-form-actions">
-                    <button type="button" class="journal-add-btn" onclick="addPerformanceEntry('${dayKey}', ${exIdx}, '${formPrefix}')">הוסף ביצוע</button>
+                    <button type="button" class="journal-edit-cancel" onclick="closePerformanceForm('${formPrefix}')">ביטול</button>
+                    <button type="button" class="journal-add-btn" onclick="addPerformanceEntry('${dayKey}', ${exIdx}, '${formPrefix}')">שמור ביצוע</button>
                 </div>
             </div>
             <div class="performance-entries">${entriesHtml}</div>
@@ -1692,6 +1705,28 @@ function refreshPerformanceExercise(dayKey, exIdx, focusId) {
     reopenCard(dayKey, exIdx, () => {
         if (focusId) document.getElementById(focusId)?.focus();
     });
+}
+
+function openPerformanceForm(prefix) {
+    const launcher = document.getElementById(prefix + '-launcher');
+    const button = document.getElementById(prefix + '-open');
+    const form = document.getElementById(prefix + '-form');
+    if (!launcher || !button || !form) return;
+    button.setAttribute('aria-expanded', 'true');
+    launcher.hidden = true;
+    form.hidden = false;
+    document.getElementById(prefix + '-date')?.focus({ preventScroll: true });
+}
+
+function closePerformanceForm(prefix) {
+    const launcher = document.getElementById(prefix + '-launcher');
+    const button = document.getElementById(prefix + '-open');
+    const form = document.getElementById(prefix + '-form');
+    if (!launcher || !button || !form) return;
+    form.hidden = true;
+    launcher.hidden = false;
+    button.setAttribute('aria-expanded', 'false');
+    button.focus();
 }
 
 function addPerformanceEntry(dayKey, exIdx, prefix) {
@@ -2568,6 +2603,9 @@ document.addEventListener('keydown', event => {
     if (event.key !== 'Escape') return;
     if (document.getElementById('notes-modal').classList.contains('show')) {
         closeNotesPage(null);
+    } else if (document.querySelector('.performance-form:not([hidden])')) {
+        const openForm = document.querySelector('.performance-form:not([hidden])');
+        closePerformanceForm(openForm.id.replace(/-form$/, ''));
     } else if (activePerformanceEdit) {
         cancelPerformanceEdit();
     }
