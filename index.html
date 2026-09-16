@@ -1,11 +1,37 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="he" dir="rtl" data-program-theme="ab">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>תוכנית אימונים - 5 ימים בשבוע</title>
+    <title>תוכנית אימונים</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4361ee">
+    <script>
+        (() => {
+            let isAbProgram = true;
+            try {
+                const rawLibrary = localStorage.getItem('training_program_library_v1');
+                if (rawLibrary !== null) {
+                    try {
+                        const library = JSON.parse(rawLibrary);
+                        const activeId = library?.activeId;
+                        const knownProgram = activeId === 'ab-4-day' || activeId === 'previous-5-day';
+                        const hasProfile = library?.profiles
+                            && Object.prototype.hasOwnProperty.call(library.profiles, activeId);
+                        const profile = hasProfile ? library.profiles[activeId] : null;
+                        const validProfile = profile && typeof profile === 'object' && !Array.isArray(profile);
+                        isAbProgram = !knownProgram || !validProfile || activeId === 'ab-4-day';
+                    } catch (_) {
+                        isAbProgram = true;
+                    }
+                }
+            } catch (_) {
+                isAbProgram = false;
+            }
+            document.documentElement.dataset.programTheme = isAbProgram ? 'ab' : 'classic';
+            document.querySelector('meta[name="theme-color"]').content = isAbProgram ? '#0f766e' : '#4361ee';
+        })();
+    </script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="אימונים">
@@ -102,6 +128,7 @@
             border-radius: var(--radius-md); transition: all 0.3s ease;
             white-space: nowrap; display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
+        .tab-btn[hidden], .tab-content[hidden] { display: none !important; }
         .tab-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,0.03); }
         .tab-btn.active { color: #fff; font-weight: 600; box-shadow: var(--shadow-sm); }
         .tab-day-label { display: inline-flex; align-items: center; gap: 4px; }
@@ -339,6 +366,21 @@
         }
 
         .set-label { font-size: 0.9rem; color: var(--text-muted); font-weight: 600; min-width: 40px; }
+        .prescription-note {
+            margin: -2px 0 12px; padding: 9px 12px;
+            color: var(--text-secondary); background: rgba(255,184,77,0.07);
+            border: 1px solid rgba(255,184,77,0.18); border-radius: var(--radius-sm);
+            font-size: 0.86rem; line-height: 1.5;
+        }
+        .prescription-note strong { color: var(--accent-orange); }
+
+        .exercise-group-title {
+            display: flex; align-items: center; gap: 10px; margin: 20px 4px 10px;
+            color: var(--accent-cyan); font-size: 0.88rem; font-weight: 700;
+        }
+        .exercise-group-title::after {
+            content: ''; height: 1px; flex: 1; background: linear-gradient(90deg, transparent, rgba(0,212,255,0.2));
+        }
 
         .num-input {
             width: 48px; padding: 5px 6px; background: var(--bg-primary);
@@ -352,6 +394,14 @@
         .sets-num:focus { border-color: var(--accent-cyan); }
         .reps-num { color: var(--accent-orange); border-color: var(--border-color); }
         .reps-num:focus { border-color: var(--accent-orange); }
+        .reps-range-separator { color: var(--text-muted); font-weight: 700; direction: ltr; }
+        .reps-text-input {
+            width: 92px; padding: 5px 8px; background: var(--bg-primary);
+            border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+            color: var(--accent-orange); font-family: 'Heebo', sans-serif;
+            font-size: 0.9rem; font-weight: 700; text-align: center;
+        }
+        .reps-text-input:focus { outline: none; border-color: var(--accent-orange); box-shadow: 0 0 0 3px rgba(255,158,0,0.12); }
         .sets-x { font-size: 1.2rem; font-weight: 800; color: var(--text-muted); }
         .reps-label { font-size: 0.88rem; color: var(--text-muted); }
 
@@ -524,10 +574,11 @@
 
         /* Timer trigger - below general notes, fits container */
         .utility-shortcuts {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px;
+            display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 24px;
         }
         .timer-trigger,
-        .notes-trigger {
+        .notes-trigger,
+        .programs-trigger {
             width: 100%; padding: 14px 20px; margin: 0;
             background: var(--bg-card); border: 1px solid var(--border-color);
             border-radius: var(--radius-md); color: var(--text-primary);
@@ -536,13 +587,73 @@
             transition: border-color 0.2s ease, background 0.2s ease;
         }
         .timer-trigger:hover,
-        .notes-trigger:hover {
+        .notes-trigger:hover,
+        .programs-trigger:hover {
             border-color: rgba(67,97,238,0.4); background: var(--bg-card-hover);
         }
         .timer-trigger svg { width: 22px; height: 22px; flex-shrink: 0; }
         .notes-trigger { border-color: rgba(45,212,191,0.24); }
         .notes-trigger:hover { border-color: rgba(45,212,191,0.5); }
         .notes-trigger-icon { color: #5eead4; font-size: 1.25rem; line-height: 1; }
+        .programs-trigger { border-color: rgba(124,77,255,0.28); }
+        .programs-trigger:hover { border-color: rgba(124,77,255,0.55); }
+        .programs-trigger-icon { color: #a78bfa; font-size: 1.2rem; line-height: 1; }
+
+        .program-modal-overlay {
+            position: fixed; inset: 0; z-index: 1002; display: none;
+            align-items: center; justify-content: center; padding: 24px;
+            background: rgba(1,3,12,0.82); backdrop-filter: blur(8px);
+        }
+        .program-modal-overlay.show { display: flex; }
+        .program-modal {
+            width: min(680px, 100%); max-height: min(780px, 90vh); overflow-y: auto;
+            padding: 22px; border: 1px solid rgba(124,77,255,0.3);
+            border-radius: var(--radius-lg); background: var(--bg-secondary); box-shadow: var(--shadow-lg);
+        }
+        .program-modal-header {
+            display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
+            margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);
+        }
+        .program-modal-header h2 { margin-bottom: 4px; font-size: 1.45rem; }
+        .program-modal-header p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.55; }
+        .program-modal-close {
+            width: 36px; height: 36px; flex-shrink: 0; border: 1px solid var(--border-color);
+            border-radius: 10px; background: rgba(255,255,255,0.04); color: var(--text-muted);
+            font-size: 1.15rem; cursor: pointer;
+        }
+        .program-modal-close:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.22); }
+        .program-list { display: flex; flex-direction: column; gap: 12px; }
+        .program-card {
+            padding: 16px; border: 1px solid var(--border-color); border-radius: var(--radius-md);
+            background: var(--bg-card); transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .program-card.active {
+            border-color: rgba(45,212,191,0.42);
+            background: linear-gradient(135deg, rgba(8,145,178,0.09), rgba(13,148,136,0.05));
+        }
+        .program-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+        .program-card h3 { font-size: 1.08rem; margin-bottom: 4px; }
+        .program-card-description { color: var(--text-muted); font-size: 0.84rem; line-height: 1.55; }
+        .program-active-badge {
+            padding: 4px 9px; border-radius: 999px; background: rgba(45,212,191,0.12);
+            color: #5eead4; font-size: 0.72rem; font-weight: 700; white-space: nowrap;
+        }
+        .program-schedule {
+            margin-top: 12px; padding: 10px 12px; border-radius: var(--radius-sm);
+            background: rgba(255,255,255,0.035); color: var(--text-secondary);
+            font-size: 0.82rem; line-height: 1.65; unicode-bidi: plaintext;
+        }
+        .program-card-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
+        .program-switch-btn {
+            padding: 9px 15px; border: 1px solid rgba(124,77,255,0.42); border-radius: var(--radius-sm);
+            background: rgba(124,77,255,0.12); color: #c4b5fd; font-family: 'Heebo', sans-serif;
+            font-size: 0.86rem; font-weight: 700; cursor: pointer;
+        }
+        .program-switch-btn:hover { background: rgba(124,77,255,0.2); }
+        .program-switch-btn:disabled {
+            border-color: var(--border-color); background: rgba(255,255,255,0.03);
+            color: var(--text-muted); cursor: default;
+        }
         .timer-panel-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.6);
             z-index: 998; display: none; align-items: center; justify-content: center;
@@ -611,7 +722,9 @@
             header { padding: 24px 0 20px; }
             header h1 { font-size: 1.85rem; }
             .utility-shortcuts { gap: 8px; margin-bottom: 20px; }
-            .timer-trigger, .notes-trigger { padding: 12px 10px; font-size: 0.92rem; }
+            .timer-trigger, .notes-trigger, .programs-trigger { padding: 12px 7px; font-size: 0.86rem; gap: 6px; }
+            .program-modal-overlay { padding: 0; align-items: stretch; }
+            .program-modal { width: 100%; max-height: 100vh; border-radius: 0; padding: 16px 12px 24px; }
             .tabs { gap: 4px; padding: 4px; }
             .tab-btn { padding: 10px 6px; font-size: 0.85rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
             .notes-page-header { flex-direction: column; padding: 16px; }
@@ -773,6 +886,340 @@
             transition: all 0.2s ease; white-space: nowrap;
         }
         .ai-video-link-btn:hover { background: #cc0000; }
+
+        /* A/B program palette — based on the active-program card */
+        html[data-program-theme="ab"] {
+            --bg-primary: #091015;
+            --bg-secondary: #0f171e;
+            --bg-card: #131e26;
+            --bg-card-hover: #17252d;
+            --accent-blue: #0f766e;
+            --accent-purple: #0e7490;
+            --accent-cyan: #5eead4;
+            --accent-green: #2dd4bf;
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1b3;
+            --text-muted: #8f98aa;
+            --border-color: #263740;
+            --control-border: #397f7b;
+            --gradient-1: linear-gradient(135deg, #0f766e, #0e7490);
+            --gradient-2: linear-gradient(135deg, #0e7490, #155e75);
+            --shadow-sm: 0 6px 18px rgba(0,0,0,0.18);
+            --shadow-md: 0 12px 32px rgba(0,0,0,0.24);
+            --shadow-lg: 0 18px 52px rgba(0,0,0,0.38);
+            --radius-md: 14px;
+            --radius-lg: 20px;
+        }
+        html[data-program-theme="ab"] body::before {
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(13,148,136,0.09) 0%, transparent 52%),
+                radial-gradient(ellipse at 80% 80%, rgba(8,145,178,0.07) 0%, transparent 52%);
+        }
+        html[data-program-theme="ab"] header h1 {
+            background: linear-gradient(135deg, #5eead4, #22d3ee);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        html[data-program-theme="ab"] .tip-banner {
+            background: linear-gradient(135deg, rgba(21,30,40,0.98), rgba(16,28,35,0.98));
+            border-color: rgba(45,212,191,0.25);
+        }
+        html[data-program-theme="ab"] .tabs,
+        html[data-program-theme="ab"] .ai-chat-section {
+            border-color: rgba(45,212,191,0.2);
+        }
+        html[data-program-theme="ab"] .tab-btn.active {
+            box-shadow: 0 5px 22px rgba(13,148,136,0.25);
+        }
+        html[data-program-theme="ab"] .exercise-card:hover,
+        html[data-program-theme="ab"] .exercise-card.open {
+            border-color: rgba(45,212,191,0.36);
+        }
+        html[data-program-theme="ab"] .exercise-number {
+            box-shadow: 0 3px 12px rgba(13,148,136,0.22);
+        }
+        html[data-program-theme="ab"] .weight-input:focus,
+        html[data-program-theme="ab"] .num-input:focus,
+        html[data-program-theme="ab"] .exercise-name-input:focus,
+        html[data-program-theme="ab"] .ai-key-input-row input:focus,
+        html[data-program-theme="ab"] .ai-chat-input-bar input:focus {
+            border-color: #2dd4bf;
+            box-shadow: 0 0 0 3px rgba(45,212,191,0.13);
+        }
+        html[data-program-theme="ab"] .add-set-btn:hover,
+        html[data-program-theme="ab"] .add-exercise-btn:hover {
+            border-color: #2dd4bf; color: #5eead4; background: rgba(45,212,191,0.06);
+        }
+        html[data-program-theme="ab"] .notes-day-title span {
+            background: rgba(13,148,136,0.16);
+        }
+        html[data-program-theme="ab"] .exercise-group-title::after {
+            background: linear-gradient(90deg, transparent, rgba(45,212,191,0.24));
+        }
+        html[data-program-theme="ab"] .add-note-btn {
+            border-color: rgba(45,212,191,0.3);
+        }
+        html[data-program-theme="ab"] .add-note-btn:hover {
+            border-color: #2dd4bf; color: #5eead4; background: rgba(45,212,191,0.06);
+        }
+        html[data-program-theme="ab"] .timer-save-row .timer-save-btn {
+            background: rgba(13,148,136,0.15);
+        }
+        html[data-program-theme="ab"] .timer-save-row .timer-save-btn:hover {
+            background: rgba(13,148,136,0.25);
+        }
+        html[data-program-theme="ab"] .note-item {
+            background: rgba(13,148,136,0.07);
+            border-inline-start-color: #14b8a6;
+        }
+        html[data-program-theme="ab"] .performance-entry-stat {
+            background: rgba(13,148,136,0.12);
+        }
+        html[data-program-theme="ab"] .btn-primary {
+            box-shadow: 0 4px 16px rgba(13,148,136,0.3);
+        }
+        html[data-program-theme="ab"] .btn-primary:hover,
+        html[data-program-theme="ab"] .ai-send-btn:hover {
+            box-shadow: 0 6px 24px rgba(13,148,136,0.38);
+        }
+        html[data-program-theme="ab"] .timer-trigger,
+        html[data-program-theme="ab"] .notes-trigger,
+        html[data-program-theme="ab"] .programs-trigger {
+            border-color: rgba(45,212,191,0.24);
+        }
+        html[data-program-theme="ab"] .timer-trigger:hover,
+        html[data-program-theme="ab"] .notes-trigger:hover,
+        html[data-program-theme="ab"] .programs-trigger:hover {
+            border-color: rgba(45,212,191,0.52); background-color: var(--bg-card-hover);
+        }
+        html[data-program-theme="ab"] .programs-trigger-icon { color: #5eead4; }
+        html[data-program-theme="ab"] .program-modal { border-color: rgba(45,212,191,0.3); }
+        html[data-program-theme="ab"] .program-modal-close:hover {
+            color: #5eead4; border-color: rgba(45,212,191,0.42);
+        }
+        html[data-program-theme="ab"] .program-switch-btn:not(:disabled) {
+            border-color: rgba(45,212,191,0.42);
+            background: rgba(13,148,136,0.12);
+            color: #99f6e4;
+        }
+        html[data-program-theme="ab"] .program-switch-btn:not(:disabled):hover {
+            background: rgba(13,148,136,0.2);
+        }
+        html[data-program-theme="ab"] :focus-visible {
+            outline: 3px solid #5eead4;
+            outline-offset: 3px;
+        }
+        .tip-banner .general-notes-input:focus-visible {
+            outline: 3px solid var(--accent-cyan);
+            outline-offset: 3px;
+            border-radius: 6px;
+        }
+
+        /* A/B polish: quieter surfaces and short, action-driven motion. */
+        html[data-program-theme="ab"] .tip-banner,
+        html[data-program-theme="ab"] .exercise-card,
+        html[data-program-theme="ab"] .ai-chat-section,
+        html[data-program-theme="ab"] .timer-trigger,
+        html[data-program-theme="ab"] .notes-trigger,
+        html[data-program-theme="ab"] .programs-trigger {
+            background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.006)), var(--bg-card);
+            border-color: rgba(148,163,184,0.12);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.14), inset 0 1px rgba(255,255,255,0.025);
+        }
+        html[data-program-theme="ab"] .tip-banner {
+            padding: 16px 18px;
+            margin-bottom: 22px;
+        }
+        html[data-program-theme="ab"] .tip-banner .icon {
+            display: grid;
+            place-items: center;
+            inline-size: 38px;
+            block-size: 38px;
+            margin-top: 0;
+            border: 1px solid rgba(45,212,191,0.14);
+            border-radius: 12px;
+            background: rgba(45,212,191,0.08);
+            box-shadow: inset 0 1px rgba(255,255,255,0.04);
+            font-size: 1.12rem;
+        }
+        html[data-program-theme="ab"] .tabs {
+            border-color: rgba(148,163,184,0.11);
+            background: rgba(15,23,30,0.78);
+            box-shadow: inset 0 1px rgba(255,255,255,0.025);
+        }
+        html[data-program-theme="ab"] .tab-btn {
+            transition: transform 0.22s cubic-bezier(0.2,0.8,0.2,1), color 0.22s ease,
+                        background-color 0.22s ease, box-shadow 0.22s ease;
+        }
+        html[data-program-theme="ab"] .tab-btn.active {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 22px rgba(13,148,136,0.22), inset 0 1px rgba(255,255,255,0.12);
+        }
+        html[data-program-theme="ab"] .tab-btn:active { transform: scale(0.985); }
+        html[data-program-theme="ab"] .day-header h2 { text-wrap: balance; }
+        html[data-program-theme="ab"] .utility-shortcuts { margin-bottom: 22px; }
+        html[data-program-theme="ab"] .timer-trigger,
+        html[data-program-theme="ab"] .notes-trigger,
+        html[data-program-theme="ab"] .programs-trigger {
+            transition: transform 0.2s cubic-bezier(0.2,0.8,0.2,1), border-color 0.2s ease,
+                        background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        html[data-program-theme="ab"] .timer-trigger svg,
+        html[data-program-theme="ab"] .notes-trigger-icon,
+        html[data-program-theme="ab"] .programs-trigger-icon {
+            transition: transform 0.2s cubic-bezier(0.2,0.8,0.2,1);
+        }
+        html[data-program-theme="ab"] .timer-trigger:active,
+        html[data-program-theme="ab"] .notes-trigger:active,
+        html[data-program-theme="ab"] .programs-trigger:active { transform: scale(0.98); }
+        html[data-program-theme="ab"] .exercise-card {
+            border-color: rgba(148,163,184,0.12);
+            transition: transform 0.24s cubic-bezier(0.2,0.8,0.2,1), border-color 0.24s ease,
+                        box-shadow 0.24s ease, background-color 0.24s ease;
+        }
+        html[data-program-theme="ab"] .exercise-card.open {
+            border-color: rgba(45,212,191,0.28);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.22), 0 0 0 1px rgba(45,212,191,0.04);
+        }
+        html[data-program-theme="ab"] .exercise-header {
+            transition: background-color 0.22s ease;
+        }
+        html[data-program-theme="ab"] .exercise-card.open .exercise-header {
+            background: rgba(45,212,191,0.025);
+        }
+        html[data-program-theme="ab"] .exercise-number {
+            transition: transform 0.22s cubic-bezier(0.2,0.8,0.2,1), box-shadow 0.22s ease,
+                        background-color 0.22s ease;
+        }
+        html[data-program-theme="ab"] .exercise-body-inner {
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: opacity 0.24s ease 0.04s, transform 0.28s cubic-bezier(0.2,0.8,0.2,1) 0.04s;
+        }
+        html[data-program-theme="ab"] .exercise-card.open .exercise-body-inner {
+            opacity: 1;
+            transform: none;
+        }
+        html[data-program-theme="ab"] .tab-content.active .exercise-card {
+            animation: abCardIn 0.36s cubic-bezier(0.2,0.8,0.2,1) backwards;
+        }
+        html[data-program-theme="ab"] .tab-content.active .exercise-card:nth-of-type(2n) { animation-delay: 0.025s; }
+        html[data-program-theme="ab"] .tab-content.active .exercise-card:nth-of-type(3n) { animation-delay: 0.05s; }
+        html[data-program-theme="ab"] .completed-check.checked,
+        html[data-program-theme="ab"] .exercise-number.done {
+            animation: abCheckPop 0.24s cubic-bezier(0.2,0.8,0.2,1);
+        }
+        html[data-program-theme="ab"] .num-input,
+        html[data-program-theme="ab"] .reps-text-input,
+        html[data-program-theme="ab"] .weight-input,
+        html[data-program-theme="ab"] .performance-input,
+        html[data-program-theme="ab"] .performance-select,
+        html[data-program-theme="ab"] .performance-textarea,
+        html[data-program-theme="ab"] .ai-key-input-row input,
+        html[data-program-theme="ab"] .ai-model-row select,
+        html[data-program-theme="ab"] .ai-chat-input-bar input,
+        html[data-program-theme="ab"] .timer-save-row input {
+            border-color: var(--control-border);
+        }
+        html[data-program-theme="ab"] .program-modal-overlay.show .program-modal {
+            animation: abSheetIn 0.26s cubic-bezier(0.2,0.8,0.2,1);
+        }
+        html[data-program-theme="ab"] .program-modal-overlay.show .program-card {
+            animation: abCardIn 0.32s cubic-bezier(0.2,0.8,0.2,1) backwards;
+        }
+        html[data-program-theme="ab"] .program-modal-overlay.show .program-card:nth-child(2) {
+            animation-delay: 0.045s;
+        }
+        @keyframes abCardIn {
+            from { opacity: 0; transform: translateY(7px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes abSheetIn {
+            from { opacity: 0; transform: translateY(10px) scale(0.99); }
+            to { opacity: 1; transform: none; }
+        }
+        @keyframes abCheckPop {
+            0% { transform: scale(0.84); }
+            70% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+        @media (hover: hover) {
+            html[data-program-theme="ab"] .timer-trigger:hover,
+            html[data-program-theme="ab"] .notes-trigger:hover,
+            html[data-program-theme="ab"] .programs-trigger:hover {
+                transform: translateY(-2px);
+                border-color: rgba(45,212,191,0.35);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.18), inset 0 1px rgba(255,255,255,0.035);
+            }
+            html[data-program-theme="ab"] .timer-trigger:hover svg,
+            html[data-program-theme="ab"] .notes-trigger:hover .notes-trigger-icon,
+            html[data-program-theme="ab"] .programs-trigger:hover .programs-trigger-icon {
+                transform: scale(1.06);
+            }
+            html[data-program-theme="ab"] .exercise-card:hover:not(.open) {
+                transform: translateY(-1px);
+                border-color: rgba(45,212,191,0.22);
+                box-shadow: 0 10px 26px rgba(0,0,0,0.18);
+            }
+            html[data-program-theme="ab"] .exercise-header:hover .exercise-number { transform: scale(1.04); }
+        }
+        @media (max-width: 600px) {
+            html[data-program-theme="ab"] .tip-banner { padding: 14px 15px; }
+            html[data-program-theme="ab"] .tip-banner .icon {
+                inline-size: 34px; block-size: 34px; border-radius: 11px; font-size: 1rem;
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html[data-program-theme="ab"] *,
+            html[data-program-theme="ab"] *::before,
+            html[data-program-theme="ab"] *::after {
+                animation: none !important;
+                transition: none !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* Each saved program keeps a visual preview of its own palette. */
+        .program-card[data-theme-preview="ab"] {
+            border-color: #397f7b;
+            background: #151e28;
+            color: #f4f4f5;
+        }
+        .program-card[data-theme-preview="ab"].active {
+            border-color: #397f7b;
+            background: linear-gradient(135deg, rgba(8,145,178,0.11), rgba(13,148,136,0.07));
+        }
+        .program-card[data-theme-preview="ab"] .program-card-description { color: #8f98aa; }
+        .program-card[data-theme-preview="ab"] .program-schedule { color: #a1a1b3; }
+        .program-card[data-theme-preview="ab"] .program-active-badge {
+            background: rgba(45,212,191,0.12); color: #5eead4;
+        }
+        .program-card[data-theme-preview="ab"] .program-switch-btn:not(:disabled) {
+            border-color: rgba(45,212,191,0.42);
+            background: rgba(13,148,136,0.12);
+            color: #99f6e4;
+        }
+        .program-card[data-theme-preview="classic"] {
+            border-color: #333354;
+            background: #1a1a2e;
+            color: #f0f0f5;
+        }
+        .program-card[data-theme-preview="classic"].active {
+            border-color: rgba(124,77,255,0.48);
+            background: linear-gradient(135deg, rgba(67,97,238,0.1), rgba(123,47,247,0.07));
+        }
+        .program-card[data-theme-preview="classic"] .program-card-description { color: #9292a8; }
+        .program-card[data-theme-preview="classic"] .program-schedule { color: #b0b0c0; }
+        .program-card[data-theme-preview="classic"] .program-active-badge {
+            background: rgba(124,77,255,0.14); color: #c4b5fd;
+        }
+        .program-card[data-theme-preview="classic"] .program-switch-btn:not(:disabled) {
+            border-color: rgba(124,77,255,0.42);
+            background: rgba(124,77,255,0.12);
+            color: #c4b5fd;
+        }
+        .program-card[data-theme-preview="classic"] .program-switch-btn:not(:disabled):hover {
+            background: rgba(124,77,255,0.2);
+        }
     </style>
 </head>
 <body>
@@ -795,6 +1242,10 @@
             <button type="button" class="notes-trigger" onclick="openNotesPage()" title="יומן דגשי ביצוע" aria-label="פתח יומן דגשי ביצוע לתרגילים">
                 <span class="notes-trigger-icon" aria-hidden="true">✎</span>
                 יומן הערות
+            </button>
+            <button type="button" class="programs-trigger" onclick="openProgramModal()" title="תוכניות אימון" aria-label="פתח את רשימת תוכניות האימון">
+                <span class="programs-trigger-icon" aria-hidden="true">▤</span>
+                תוכניות
             </button>
         </div>
 
@@ -922,6 +1373,19 @@
     <div class="notes-modal-overlay" id="notes-modal" onclick="closeNotesPage(event)">
         <div class="notes-modal" role="dialog" aria-modal="true" aria-labelledby="notes-page-title">
             <div id="exercise-notes-page"></div>
+        </div>
+    </div>
+
+    <div class="program-modal-overlay" id="program-modal" onclick="closeProgramModal(event)">
+        <div class="program-modal" role="dialog" aria-modal="true" aria-labelledby="program-modal-title">
+            <div class="program-modal-header">
+                <div>
+                    <h2 id="program-modal-title">תוכניות אימון</h2>
+                    <p>המשקלים, ההיסטוריה, דגשי הביצוע ויומן הביצועים נשמרים בנפרד לכל תוכנית.</p>
+                </div>
+                <button type="button" class="program-modal-close" onclick="closeProgramModal(null)" aria-label="סגור תוכניות אימון">✕</button>
+            </div>
+            <div class="program-list" id="program-list"></div>
         </div>
     </div>
 
@@ -1125,6 +1589,148 @@ const defaultWorkoutData = {
     }
 };
 
+const newAbWorkoutData = {
+    A: {
+        title: "אימון A — רגליים, חזה ויד אחורית",
+        subtitle: "האימון מבוצע פעמיים בשבוע",
+        exercises: [
+            {
+                name: "סקוואט עם מוט",
+                muscleGroup: "רגליים",
+                groups: [{ sets: 3, reps: 5 }],
+                notes: [],
+                journalId: "ab4-A-barbell-squat"
+            },
+            {
+                name: "לחיצת רגליים במכונה",
+                muscleGroup: "רגליים",
+                groups: [{ sets: 3, reps: 15 }],
+                notes: [],
+                journalId: "ab4-A-leg-press"
+            },
+            {
+                name: "פשיטת ברכיים במכונה",
+                muscleGroup: "רגליים",
+                groups: [{ sets: 3, reps: 12 }, { sets: 1, reps: 12, label: "דרופ סט" }],
+                notes: [],
+                journalId: "ab4-A-leg-extension"
+            },
+            {
+                name: "עליות תאומים בעמידה",
+                muscleGroup: "רגליים",
+                groups: [{ sets: 3, reps: 20 }],
+                notes: [],
+                journalId: "ab4-A-calf-raise"
+            },
+            {
+                name: "לחיצת חזה בשכיבה עם מוט",
+                muscleGroup: "חזה",
+                groups: [{ sets: 3, reps: 5 }, { sets: 1, reps: 15, label: "סט נפח" }],
+                notes: [],
+                journalId: "ab4-A-bench-press"
+            },
+            {
+                name: "לחיצת חזה בשיפוע חיובי עם משקולות יד",
+                muscleGroup: "חזה",
+                groups: [{ sets: 3, reps: 5, repsMax: 8 }],
+                notes: [],
+                journalId: "ab4-A-incline-dumbbell-press"
+            },
+            {
+                name: "פרפר בעמידה בכבלים",
+                muscleGroup: "חזה",
+                groups: [{ sets: 2, reps: 10 }],
+                notes: [],
+                journalId: "ab4-A-cable-fly"
+            },
+            {
+                name: "פשיטת מרפקים בפולי עליון עם מוט",
+                muscleGroup: "יד אחורית",
+                groups: [{ sets: 3, reps: 10 }],
+                notes: [],
+                journalId: "ab4-A-triceps-pushdown"
+            },
+            {
+                name: "פשיטת מרפקים מעל הראש בכבל",
+                muscleGroup: "יד אחורית",
+                groups: [{ sets: 3, reps: 12 }],
+                notes: [],
+                journalId: "ab4-A-overhead-triceps-extension"
+            }
+        ]
+    },
+    B: {
+        title: "אימון B — גב, כתפיים ויד קדמית",
+        subtitle: "האימון מבוצע פעמיים בשבוע",
+        exercises: [
+            {
+                name: "עליות מתח",
+                muscleGroup: "גב",
+                groups: [{ sets: 3, repsText: "עד כשל" }],
+                notes: [],
+                prescriptionNote: "חלופה: 3×5 עם משקל נוסף",
+                journalId: "ab4-B-pull-ups"
+            },
+            {
+                name: "פולאובר עם משקולת יד",
+                muscleGroup: "גב",
+                groups: [{ sets: 3, reps: 12 }],
+                notes: [],
+                journalId: "ab4-B-dumbbell-pullover"
+            },
+            {
+                name: "חתירה בישיבה במכונה",
+                muscleGroup: "גב",
+                groups: [{ sets: 3, reps: 12 }],
+                notes: [],
+                journalId: "ab4-B-machine-row"
+            },
+            {
+                name: "לחיצת כתפיים בעמידה עם מוט (לחיצה צבאית)",
+                muscleGroup: "כתפיים",
+                groups: [{ sets: 3, reps: 5 }],
+                notes: [],
+                journalId: "ab4-B-military-press"
+            },
+            {
+                name: "הרחקת כתפיים לצדדים",
+                muscleGroup: "כתפיים",
+                groups: [{ sets: 3, reps: 15 }],
+                notes: [],
+                journalId: "ab4-B-lateral-raise"
+            },
+            {
+                name: "משיכת חבל לפנים בפולי עליון",
+                muscleGroup: "כתפיים",
+                groups: [{ sets: 3, reps: 15 }],
+                notes: [],
+                journalId: "ab4-B-face-pull"
+            },
+            {
+                name: "כפיפת מרפקים בישיבה בשיפוע חיובי עם משקולות יד",
+                muscleGroup: "יד קדמית",
+                groups: [{ sets: 3, reps: 8 }],
+                notes: [],
+                journalId: "ab4-B-incline-dumbbell-curl"
+            },
+            {
+                name: "כפיפת מרפקים בספיידר עם משקולות יד",
+                muscleGroup: "יד קדמית",
+                groups: [{ sets: 3, reps: 8 }],
+                notes: [],
+                journalId: "ab4-B-spider-curl"
+            },
+            {
+                name: "כפיפת מרפקים באחיזת פטיש בכבל",
+                muscleGroup: "יד קדמית",
+                groups: [{ sets: 3, reps: 12 }],
+                notes: [],
+                journalId: "ab4-B-cable-hammer-curl"
+            }
+        ]
+    }
+};
+
 const PROGRAM_KEY = 'workout_program_v2';
 const WEIGHTS_KEY = 'training_weights_v2';
 const HISTORY_KEY = 'training_history';
@@ -1132,13 +1738,54 @@ const GENERAL_NOTES_KEY = 'training_general_notes';
 const TIMER_PRESETS_KEY = 'timer_presets';
 const WEIGHT_UNITS_KEY = 'weight_units';
 const EXERCISE_JOURNAL_KEY = 'training_exercise_journal_v1';
+const PROGRAM_LIBRARY_KEY = 'training_program_library_v1';
+const LEGACY_ACTIVE_PROGRAM_KEY = 'training_active_program_v1';
+const PROFILE_STORAGE_PREFIX = 'training_profile_v1';
+const PREVIOUS_PROGRAM_ID = 'previous-5-day';
+const NEW_AB_PROGRAM_ID = 'ab-4-day';
+const ALL_DAY_KEYS = Object.freeze(['A', 'B', 'C', 'D', 'E']);
+const PROFILE_SLOTS = Object.freeze({
+    program: 'program',
+    template: 'template',
+    weights: 'weights',
+    history: 'history',
+    exerciseJournal: 'exerciseJournal',
+    weightUnits: 'weightUnits',
+    generalNotes: 'generalNotes'
+});
+
+const PROGRAM_CONFIGS = Object.freeze({
+    [PREVIOUS_PROGRAM_ID]: {
+        theme: 'classic',
+        themeColor: '#4361ee',
+        name: 'התוכנית הקודמת',
+        description: 'התוכנית, המשקלים ויומן הביצועים שנשמרו לפני המעבר',
+        scheduleText: '5 אימונים בשבוע · יום א׳ A · יום ב׳ B · יום ג׳ C · יום ד׳ D · יום ה׳ E',
+        weekdays: Object.freeze({ 0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E' }),
+        tabLabels: Object.freeze({ A: 'יום א׳ ·', B: 'יום ב׳ ·', C: 'יום ג׳ ·', D: 'יום ד׳ ·', E: 'יום ה׳ ·' }),
+        tabSummaries: Object.freeze({
+            A: 'חזה, כתפיים, יד אחורית', B: 'גב, כתף אחורית, יד קדמית', C: 'ירכיים, ישבן, תאומים',
+            D: 'חזה, גב, כתפיים, ידיים', E: 'רגליים, תאומים'
+        })
+    },
+    [NEW_AB_PROGRAM_ID]: {
+        theme: 'ab',
+        themeColor: '#0f766e',
+        name: 'תוכנית A/B החדשה',
+        description: 'ארבעה אימונים בשבוע, עם יום מנוחה באמצע',
+        scheduleText: 'יום א׳ A · יום ב׳ B · יום ג׳ מנוחה · יום ד׳ A · יום ה׳ B',
+        weekdays: Object.freeze({ 0: 'A', 1: 'B', 3: 'A', 4: 'B' }),
+        tabLabels: Object.freeze({ A: 'אימון', B: 'אימון' }),
+        tabSummaries: Object.freeze({ A: 'רגליים, חזה, יד אחורית', B: 'גב, כתפיים, יד קדמית' })
+    }
+});
 
 function getWeightUnits() {
-    try { return JSON.parse(localStorage.getItem(WEIGHT_UNITS_KEY)) || {}; } catch { return {}; }
+    return readJsonStorage(activeStorageKey(PROFILE_SLOTS.weightUnits, WEIGHT_UNITS_KEY), {});
 }
 
 function saveWeightUnits(u) {
-    localStorage.setItem(WEIGHT_UNITS_KEY, JSON.stringify(u));
+    localStorage.setItem(activeStorageKey(PROFILE_SLOTS.weightUnits, WEIGHT_UNITS_KEY), JSON.stringify(u || {}));
 }
 
 function getUnitForWeight(wid) {
@@ -1172,7 +1819,7 @@ function makeExerciseJournalId(dayKey) {
     return dayKey + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
 }
 
-function ensureExerciseJournalIds(program) {
+function ensureExerciseJournalIds(program, persist = true) {
     let changed = false;
     Object.entries(program || {}).forEach(([dayKey, day]) => {
         (day?.exercises || []).forEach(exercise => {
@@ -1186,51 +1833,281 @@ function ensureExerciseJournalIds(program) {
             }
         });
     });
-    if (changed) {
-        try { localStorage.setItem(PROGRAM_KEY, JSON.stringify(program)); } catch (_) {}
+    if (changed && persist) {
+        try { localStorage.setItem(activeStorageKey(PROFILE_SLOTS.program, PROGRAM_KEY), JSON.stringify(program)); } catch (_) {}
     }
     return program;
 }
 
-function getProgram() {
+function cloneData(value) {
+    if (value === undefined) return undefined;
+    return JSON.parse(JSON.stringify(value));
+}
+
+function profileStorageKey(programId, slot) {
+    return `${PROFILE_STORAGE_PREFIX}:${programId}:${slot}`;
+}
+
+function readJsonStorage(key, fallback) {
     try {
-        const saved = localStorage.getItem(PROGRAM_KEY);
+        const raw = localStorage.getItem(key);
+        return raw === null ? cloneData(fallback) : JSON.parse(raw);
+    } catch {
+        return cloneData(fallback);
+    }
+}
+
+function hasKnownProgramProfile(library, programId) {
+    const isKnownId = programId === PREVIOUS_PROGRAM_ID || programId === NEW_AB_PROGRAM_ID;
+    return isKnownId
+        && Boolean(library?.profiles)
+        && Object.prototype.hasOwnProperty.call(library.profiles, programId)
+        && isPlainObject(library.profiles[programId]);
+}
+
+function getActiveProgramId() {
+    const library = getProgramLibrary();
+    return hasKnownProgramProfile(library, library?.activeId) ? library.activeId : PREVIOUS_PROGRAM_ID;
+}
+
+function getActiveProgramConfig() {
+    return PROGRAM_CONFIGS[getActiveProgramId()] || PROGRAM_CONFIGS[PREVIOUS_PROGRAM_ID];
+}
+
+function applyActiveProgramTheme() {
+    const config = getActiveProgramConfig();
+    const programTheme = config.theme === 'ab' ? 'ab' : 'classic';
+    document.documentElement.dataset.programTheme = programTheme;
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) themeMeta.content = config.themeColor || '#4361ee';
+}
+
+function getProgramTemplate(programId = getActiveProgramId()) {
+    const stored = readJsonStorage(profileStorageKey(programId, PROFILE_SLOTS.template), null);
+    if (stored && typeof stored === 'object' && !Array.isArray(stored)) return stored;
+    return programId === NEW_AB_PROGRAM_ID ? cloneData(newAbWorkoutData) : cloneData(defaultWorkoutData);
+}
+
+function getProgramLibrary() {
+    try {
+        const library = JSON.parse(localStorage.getItem(PROGRAM_LIBRARY_KEY));
+        if (!library || typeof library !== 'object' || Array.isArray(library)) return null;
+        if (!library.profiles || typeof library.profiles !== 'object' || Array.isArray(library.profiles)) return null;
+        return library;
+    } catch {
+        return null;
+    }
+}
+
+function saveProgramLibrary(library) {
+    localStorage.setItem(PROGRAM_LIBRARY_KEY, JSON.stringify(library));
+}
+
+function activeStorageKey(slot, legacyKey) {
+    const library = getProgramLibrary();
+    if (hasKnownProgramProfile(library, library?.activeId)) return profileStorageKey(library.activeId, slot);
+    return legacyKey;
+}
+
+function readProfileSlot(programId, slot, fallback) {
+    return readJsonStorage(profileStorageKey(programId, slot), fallback);
+}
+
+function writeProfileSlot(programId, slot, value) {
+    localStorage.setItem(profileStorageKey(programId, slot), JSON.stringify(value));
+}
+
+function isValidStoredProfileSlot(programId, slot) {
+    const raw = localStorage.getItem(profileStorageKey(programId, slot));
+    if (raw === null) return false;
+    try {
+        const value = JSON.parse(raw);
+        if (slot === PROFILE_SLOTS.history) return Array.isArray(value);
+        if (slot === PROFILE_SLOTS.generalNotes) return typeof value === 'string';
+        return isPlainObject(value);
+    } catch {
+        return false;
+    }
+}
+
+function initializeProgramLibrary() {
+    const existing = getProgramLibrary();
+    const hasCompleteLibrary = hasKnownProgramProfile(existing, PREVIOUS_PROGRAM_ID)
+        && hasKnownProgramProfile(existing, NEW_AB_PROGRAM_ID)
+        && [PREVIOUS_PROGRAM_ID, NEW_AB_PROGRAM_ID].every(programId =>
+            Object.values(PROFILE_SLOTS).every(slot => isValidStoredProfileSlot(programId, slot))
+        );
+    if (hasCompleteLibrary) {
+        if (!hasKnownProgramProfile(existing, existing.activeId)) {
+            existing.activeId = NEW_AB_PROGRAM_ID;
+            saveProgramLibrary(existing);
+        }
+        return existing;
+    }
+
+    const previousSnapshot = existing?.profiles?.[PREVIOUS_PROGRAM_ID]?.data || {};
+    const newSnapshot = existing?.profiles?.[NEW_AB_PROGRAM_ID]?.data || {};
+    const existingSlot = (programId, slot) => {
+        if (!isValidStoredProfileSlot(programId, slot)) return undefined;
+        const key = profileStorageKey(programId, slot);
+        return readJsonStorage(key, undefined);
+    };
+    const validObject = value => isPlainObject(value) ? value : undefined;
+    const validArray = value => Array.isArray(value) ? value : undefined;
+    const validString = value => typeof value === 'string' ? value : undefined;
+    const legacyProgram = validObject(readJsonStorage(PROGRAM_KEY, defaultWorkoutData)) || defaultWorkoutData;
+    const previousProgramSource = existingSlot(PREVIOUS_PROGRAM_ID, PROFILE_SLOTS.program)
+        || validObject(previousSnapshot.program)
+        || legacyProgram;
+    const previousProgram = ensureExerciseJournalIds(cloneData(previousProgramSource), false);
+    const newProgramSource = existingSlot(NEW_AB_PROGRAM_ID, PROFILE_SLOTS.program)
+        || validObject(newSnapshot.program)
+        || newAbWorkoutData;
+    const newProgram = ensureExerciseJournalIds(cloneData(newProgramSource), false);
+    const previousWeights = existingSlot(PREVIOUS_PROGRAM_ID, PROFILE_SLOTS.weights)
+        ?? validObject(previousSnapshot.weights)
+        ?? validObject(readJsonStorage(WEIGHTS_KEY, {}))
+        ?? {};
+    const previousHistory = existingSlot(PREVIOUS_PROGRAM_ID, PROFILE_SLOTS.history)
+        ?? validArray(previousSnapshot.history)
+        ?? validArray(readJsonStorage(HISTORY_KEY, []))
+        ?? [];
+    const previousJournal = normalizeExerciseJournal(
+        existingSlot(PREVIOUS_PROGRAM_ID, PROFILE_SLOTS.exerciseJournal)
+        ?? validObject(previousSnapshot.exerciseJournal)
+        ?? readJsonStorage(EXERCISE_JOURNAL_KEY, {})
+    );
+    const previousUnits = existingSlot(PREVIOUS_PROGRAM_ID, PROFILE_SLOTS.weightUnits)
+        ?? validObject(previousSnapshot.weightUnits)
+        ?? validObject(readJsonStorage(WEIGHT_UNITS_KEY, {}))
+        ?? {};
+    const legacyGeneralNotes = localStorage.getItem(GENERAL_NOTES_KEY);
+    const previousGeneralNotes = existingSlot(PREVIOUS_PROGRAM_ID, PROFILE_SLOTS.generalNotes)
+        ?? validString(previousSnapshot.generalNotes)
+        ?? (legacyGeneralNotes !== null ? legacyGeneralNotes : DEFAULT_GENERAL_NOTES);
+    const newGeneralNotes = existingSlot(NEW_AB_PROGRAM_ID, PROFILE_SLOTS.generalNotes)
+        ?? validString(newSnapshot.generalNotes)
+        ?? (legacyGeneralNotes !== null ? legacyGeneralNotes : DEFAULT_GENERAL_NOTES);
+    const previousTemplate = existingSlot(PREVIOUS_PROGRAM_ID, PROFILE_SLOTS.template)
+        || previousProgram;
+    const newTemplate = existingSlot(NEW_AB_PROGRAM_ID, PROFILE_SLOTS.template)
+        || ensureExerciseJournalIds(cloneData(newAbWorkoutData), false);
+    const newWeights = existingSlot(NEW_AB_PROGRAM_ID, PROFILE_SLOTS.weights) ?? validObject(newSnapshot.weights) ?? {};
+    const newHistory = existingSlot(NEW_AB_PROGRAM_ID, PROFILE_SLOTS.history) ?? validArray(newSnapshot.history) ?? [];
+    const newJournal = existingSlot(NEW_AB_PROGRAM_ID, PROFILE_SLOTS.exerciseJournal) ?? validObject(newSnapshot.exerciseJournal) ?? {};
+    const newUnits = existingSlot(NEW_AB_PROGRAM_ID, PROFILE_SLOTS.weightUnits) ?? validObject(newSnapshot.weightUnits) ?? {};
+    const legacyActiveId = localStorage.getItem(LEGACY_ACTIVE_PROGRAM_KEY);
+    const now = Date.now();
+    const requestedActiveId = hasKnownProgramProfile(existing, existing?.activeId)
+        ? existing.activeId
+        : legacyActiveId;
+    const library = {
+        version: 1,
+        createdAt: Number(existing?.createdAt) || now,
+        activeId: hasKnownProgramProfile(existing, requestedActiveId) ? requestedActiveId : NEW_AB_PROGRAM_ID,
+        profiles: {
+            [PREVIOUS_PROGRAM_ID]: {
+                id: PREVIOUS_PROGRAM_ID,
+                name: PROGRAM_CONFIGS[PREVIOUS_PROGRAM_ID].name,
+                description: PROGRAM_CONFIGS[PREVIOUS_PROGRAM_ID].description,
+                createdAt: Number(existing?.profiles?.[PREVIOUS_PROGRAM_ID]?.createdAt) || now,
+                updatedAt: now
+            },
+            [NEW_AB_PROGRAM_ID]: {
+                id: NEW_AB_PROGRAM_ID,
+                name: PROGRAM_CONFIGS[NEW_AB_PROGRAM_ID].name,
+                description: PROGRAM_CONFIGS[NEW_AB_PROGRAM_ID].description,
+                createdAt: Number(existing?.profiles?.[NEW_AB_PROGRAM_ID]?.createdAt) || now,
+                updatedAt: now
+            }
+        }
+    };
+
+    try {
+        writeProfileSlot(PREVIOUS_PROGRAM_ID, PROFILE_SLOTS.program, previousProgram);
+        writeProfileSlot(PREVIOUS_PROGRAM_ID, PROFILE_SLOTS.template, previousTemplate);
+        writeProfileSlot(PREVIOUS_PROGRAM_ID, PROFILE_SLOTS.weights, previousWeights || {});
+        writeProfileSlot(PREVIOUS_PROGRAM_ID, PROFILE_SLOTS.history, Array.isArray(previousHistory) ? previousHistory : []);
+        writeProfileSlot(PREVIOUS_PROGRAM_ID, PROFILE_SLOTS.exerciseJournal, previousJournal);
+        writeProfileSlot(PREVIOUS_PROGRAM_ID, PROFILE_SLOTS.weightUnits, previousUnits || {});
+        writeProfileSlot(PREVIOUS_PROGRAM_ID, PROFILE_SLOTS.generalNotes, previousGeneralNotes);
+
+        writeProfileSlot(NEW_AB_PROGRAM_ID, PROFILE_SLOTS.program, newProgram);
+        writeProfileSlot(NEW_AB_PROGRAM_ID, PROFILE_SLOTS.template, newTemplate);
+        writeProfileSlot(NEW_AB_PROGRAM_ID, PROFILE_SLOTS.weights, newWeights || {});
+        writeProfileSlot(NEW_AB_PROGRAM_ID, PROFILE_SLOTS.history, Array.isArray(newHistory) ? newHistory : []);
+        writeProfileSlot(NEW_AB_PROGRAM_ID, PROFILE_SLOTS.exerciseJournal,
+            normalizeExerciseJournal(newJournal));
+        writeProfileSlot(NEW_AB_PROGRAM_ID, PROFILE_SLOTS.weightUnits, newUnits || {});
+        writeProfileSlot(NEW_AB_PROGRAM_ID, PROFILE_SLOTS.generalNotes, newGeneralNotes);
+
+        // The registry is deliberately written last. Legacy keys stay untouched as a recovery copy.
+        saveProgramLibrary(library);
+        return library;
+    } catch (error) {
+        return null;
+    }
+}
+
+function getProgramDayKeys(program = getProgram()) {
+    return ALL_DAY_KEYS.filter(dayKey => program?.[dayKey]);
+}
+
+function getProgram() {
+    const template = getProgramTemplate();
+    try {
+        const saved = localStorage.getItem(activeStorageKey(PROFILE_SLOTS.program, PROGRAM_KEY));
         if (saved) {
             const data = JSON.parse(saved);
-            Object.keys(defaultWorkoutData).forEach(day => {
-                if (!data[day]) data[day] = JSON.parse(JSON.stringify(defaultWorkoutData[day]));
-            });
-            return ensureExerciseJournalIds(data);
+            if (data && typeof data === 'object' && !Array.isArray(data)) return ensureExerciseJournalIds(data);
         }
     } catch {}
-    return ensureExerciseJournalIds(JSON.parse(JSON.stringify(defaultWorkoutData)));
+    return ensureExerciseJournalIds(cloneData(template));
 }
 
 function saveProgram(data) {
-    localStorage.setItem(PROGRAM_KEY, JSON.stringify(data));
+    localStorage.setItem(activeStorageKey(PROFILE_SLOTS.program, PROGRAM_KEY), JSON.stringify(data));
 }
 
 function getWeights() {
-    try { return JSON.parse(localStorage.getItem(WEIGHTS_KEY)) || {}; } catch { return {}; }
+    return readJsonStorage(activeStorageKey(PROFILE_SLOTS.weights, WEIGHTS_KEY), {});
 }
 
 function saveWeightsData(w) {
-    localStorage.setItem(WEIGHTS_KEY, JSON.stringify(w));
+    localStorage.setItem(activeStorageKey(PROFILE_SLOTS.weights, WEIGHTS_KEY), JSON.stringify(w || {}));
 }
 
 function getHistory() {
-    try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch { return []; }
+    const history = readJsonStorage(activeStorageKey(PROFILE_SLOTS.history, HISTORY_KEY), []);
+    return Array.isArray(history) ? history : [];
+}
+
+function saveHistoryData(history) {
+    localStorage.setItem(activeStorageKey(PROFILE_SLOTS.history, HISTORY_KEY), JSON.stringify(Array.isArray(history) ? history : []));
 }
 
 function getGeneralNotes() {
     try {
-        const s = localStorage.getItem(GENERAL_NOTES_KEY);
-        return s !== null ? s : DEFAULT_GENERAL_NOTES;
+        const library = getProgramLibrary();
+        if (hasKnownProgramProfile(library, library?.activeId)) {
+            const value = readProfileSlot(library.activeId, PROFILE_SLOTS.generalNotes, DEFAULT_GENERAL_NOTES);
+            return typeof value === 'string' ? value : DEFAULT_GENERAL_NOTES;
+        }
+        const legacyValue = localStorage.getItem(GENERAL_NOTES_KEY);
+        return legacyValue !== null ? legacyValue : DEFAULT_GENERAL_NOTES;
     } catch { return DEFAULT_GENERAL_NOTES; }
 }
 
-function saveGeneralNotes(text) {
-    try { localStorage.setItem(GENERAL_NOTES_KEY, text); } catch (_) {}
+function saveGeneralNotes(text, throwOnError = false) {
+    try {
+        const library = getProgramLibrary();
+        if (hasKnownProgramProfile(library, library?.activeId)) writeProfileSlot(library.activeId, PROFILE_SLOTS.generalNotes, String(text));
+        else localStorage.setItem(GENERAL_NOTES_KEY, String(text));
+        return true;
+    } catch (error) {
+        if (throwOnError) throw error;
+        return false;
+    }
 }
 
 function resizeGeneralNotes(ta) {
@@ -1263,8 +2140,18 @@ function totalSetsForExercise(exercise) {
     return exercise.groups.reduce((sum, g) => sum + g.sets, 0);
 }
 
+function groupRepetitionText(group) {
+    if (group.repsText) return String(group.repsText);
+    if (group.repsMax) return `${group.reps}–${group.repsMax}`;
+    return String(group.reps);
+}
+
+function groupPrescriptionText(group) {
+    return `${group.sets}×${groupRepetitionText(group)}`;
+}
+
 function badgeText(exercise) {
-    return exercise.groups.map(g => `${g.sets}×${g.reps}`).join(' + ');
+    return exercise.groups.map(groupPrescriptionText).join(' + ');
 }
 
 let activePerformanceEdit = null;
@@ -1399,35 +2286,50 @@ function renderDay(dayKey) {
     const program = getProgram();
     const day = program[dayKey];
     const container = document.getElementById(`day-${dayKey}`);
+    if (!container) return;
+    if (!day) {
+        container.innerHTML = '';
+        return;
+    }
     const weights = getWeights();
 
     let html = `
         <div class="day-header">
-            <h2>${day.title}</h2>
-            <span class="subtitle">${day.subtitle}</span>
+            <h2>${escapeHtmlChat(day.title)}</h2>
+            <span class="subtitle">${escapeHtmlChat(day.subtitle)}</span>
         </div>
     `;
 
+    let currentMuscleGroup = '';
     day.exercises.forEach((exercise, exIdx) => {
         const badge = badgeText(exercise);
+        if (exercise.muscleGroup && exercise.muscleGroup !== currentMuscleGroup) {
+            currentMuscleGroup = exercise.muscleGroup;
+            html += `<div class="exercise-group-title">${escapeHtmlChat(currentMuscleGroup)}</div>`;
+        }
 
         html += `
         <div class="exercise-card" data-day="${dayKey}">
-            <div class="exercise-header" onclick="toggleExercise(this)">
+            <div class="exercise-header" role="button" tabindex="0" aria-expanded="false"
+                 aria-controls="exercise-body-${dayKey}-${exIdx}" onclick="toggleExercise(this)"
+                 onkeydown="handleExerciseHeaderKeydown(event, this)">
                 <div class="right-side">
                     <div class="exercise-number" data-num="${exIdx + 1}">${exIdx + 1}</div>
-                    <span class="exercise-name">${exercise.name}</span>
+                    <span class="exercise-name">${escapeHtmlChat(exercise.name)}</span>
                 </div>
-                <span class="exercise-sets-badge">${badge}</span>
+                <span class="exercise-sets-badge">${escapeHtmlChat(badge)}</span>
                 <button class="remove-exercise-btn" onclick="event.stopPropagation(); removeExercise('${dayKey}', ${exIdx})" title="הסר תרגיל"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
                 <svg class="exercise-toggle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
-            <div class="exercise-body">
+            <div class="exercise-body" id="exercise-body-${dayKey}-${exIdx}">
                 <div class="exercise-body-inner">
                     <div style="margin-bottom:12px">
-                        <input type="text" class="exercise-name-input" value="${exercise.name}"
+                        <input type="text" class="exercise-name-input" value="${escapeHtmlAttr(exercise.name)}" dir="auto"
                                onchange="updateExerciseName('${dayKey}', ${exIdx}, this.value)">
                     </div>
+                    ${exercise.prescriptionNote ? `
+                        <div class="prescription-note"><strong>אפשרות נוספת:</strong> ${escapeHtmlChat(exercise.prescriptionNote.replace(/^חלופה:\s*/, ''))}</div>
+                    ` : ''}
                     <div class="sets-grid">
         `;
 
@@ -1435,20 +2337,31 @@ function renderDay(dayKey) {
             const wid = weightId(dayKey, exIdx, grpIdx);
             const savedWeight = weights[wid] || '';
             const labelHtml = grp.label
-                ? `<span class="set-label">${grp.label}</span>`
+                ? `<span class="set-label">${escapeHtmlChat(grp.label)}</span>`
                 : '';
+            const repetitionsHtml = grp.repsText
+                ? `<input type="text" class="reps-text-input" value="${escapeHtmlAttr(grp.repsText)}" dir="auto"
+                           title="יעד חזרות"
+                           onchange="updateGroup('${dayKey}', ${exIdx}, ${grpIdx}, 'repsText', this.value)">`
+                : `
+                    <input type="number" class="num-input reps-num" value="${grp.reps}" min="1"
+                           title="מספר חזרות מינימלי"
+                           onchange="updateGroup('${dayKey}', ${exIdx}, ${grpIdx}, 'reps', this.value)">
+                    ${grp.repsMax ? `
+                        <span class="reps-range-separator">–</span>
+                        <input type="number" class="num-input reps-num" value="${grp.repsMax}" min="${grp.reps}"
+                               title="מספר חזרות מקסימלי"
+                               onchange="updateGroup('${dayKey}', ${exIdx}, ${grpIdx}, 'repsMax', this.value)">` : ''}`;
 
             html += `
                 <div class="set-row">
                     ${labelHtml}
-                    <input type="number" class="num-input sets-num" value="${grp.sets}" min="1"
-                           title="מספר סטים"
-                           onchange="updateGroup('${dayKey}', ${exIdx}, ${grpIdx}, 'sets', this.value)">
-                    <span class="sets-x">×</span>
-                    <input type="number" class="num-input reps-num" value="${grp.reps}" min="1"
-                           title="מספר חזרות"
-                           onchange="updateGroup('${dayKey}', ${exIdx}, ${grpIdx}, 'reps', this.value)">
-                    <span class="reps-label">חזרות</span>
+                     <input type="number" class="num-input sets-num" value="${grp.sets}" min="1"
+                            title="מספר סטים"
+                            onchange="updateGroup('${dayKey}', ${exIdx}, ${grpIdx}, 'sets', this.value)">
+                     <span class="sets-x">×</span>
+                     ${repetitionsHtml}
+                     ${grp.repsText ? '' : '<span class="reps-label">חזרות</span>'}
                     <div class="weight-input-wrapper">
                         <input type="number" class="weight-input" data-id="${wid}"
                                placeholder="משקל" value="${savedWeight}" step="0.5" min="0"
@@ -1484,10 +2397,43 @@ function renderDay(dayKey) {
     container.innerHTML = html;
 }
 
-const WORKOUT_DAY_BY_WEEKDAY = Object.freeze({ 0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E' });
-
 function workoutDayForDate(date = new Date()) {
-    return WORKOUT_DAY_BY_WEEKDAY[date.getDay()] || null;
+    return getActiveProgramConfig().weekdays[date.getDay()] || null;
+}
+
+function configureProgramTabs() {
+    const program = getProgram();
+    const config = getActiveProgramConfig();
+    ALL_DAY_KEYS.forEach(dayKey => {
+        const button = document.querySelector(`.tab-btn[data-day="${dayKey}"]`);
+        const content = document.getElementById(`day-${dayKey}`);
+        const day = program[dayKey];
+        if (!button || !content) return;
+        button.hidden = !day;
+        content.hidden = !day;
+        if (!day) {
+            button.classList.remove('active', 'today');
+            content.classList.remove('active');
+            return;
+        }
+        const label = button.querySelector('.tab-day-label');
+        const summary = button.querySelector('small');
+        if (label) {
+            label.innerHTML = `${escapeHtmlChat(config.tabLabels[dayKey] || 'אימון')} <bdi dir="ltr">${dayKey}</bdi>`;
+        }
+        if (summary) summary.textContent = config.tabSummaries[dayKey] || day.subtitle || '';
+    });
+
+    const activeButton = document.querySelector('.tab-btn.active:not([hidden])');
+    if (!activeButton) {
+        const firstDay = getProgramDayKeys(program)[0];
+        if (firstDay) switchTab(firstDay, false);
+    }
+}
+
+function renderAllDays() {
+    configureProgramTabs();
+    ALL_DAY_KEYS.forEach(renderDay);
 }
 
 function markTodayWorkout(dayKey) {
@@ -1504,10 +2450,128 @@ function switchTab(dayKey, updateHash = true) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     const tabButton = document.querySelector(`.tab-btn[data-day="${dayKey}"]`);
     const tabContent = document.getElementById(`day-${dayKey}`);
-    if (!tabButton || !tabContent) return;
+    if (!tabButton || !tabContent || tabButton.hidden) return;
     tabButton.classList.add('active');
     tabContent.classList.add('active');
     if (updateHash && history.replaceState) history.replaceState(null, '', '#day-' + dayKey);
+}
+
+function renderProgramModal() {
+    const container = document.getElementById('program-list');
+    const library = getProgramLibrary();
+    if (!container || !library) return;
+    const activeId = getActiveProgramId();
+    const orderedIds = [NEW_AB_PROGRAM_ID, PREVIOUS_PROGRAM_ID]
+        .filter(programId => library.profiles[programId]);
+    container.innerHTML = orderedIds.map(programId => {
+        const profile = library.profiles[programId];
+        const config = PROGRAM_CONFIGS[programId] || {};
+        const isActive = programId === activeId;
+        const themePreview = config.theme === 'ab' ? 'ab' : 'classic';
+        return `
+            <article class="program-card${isActive ? ' active' : ''}" data-theme-preview="${themePreview}" ${isActive ? 'aria-current="true"' : ''}>
+                <div class="program-card-top">
+                    <div>
+                        <h3>${escapeHtmlChat(profile.name || config.name || 'תוכנית אימונים')}</h3>
+                        <p class="program-card-description">${escapeHtmlChat(profile.description || config.description || '')}</p>
+                    </div>
+                    ${isActive ? '<span class="program-active-badge">פעילה עכשיו</span>' : ''}
+                </div>
+                <div class="program-schedule">${escapeHtmlChat(config.scheduleText || '')}</div>
+                <div class="program-card-actions">
+                    <button type="button" class="program-switch-btn" ${isActive ? 'disabled' : ''}
+                            onclick="switchTrainingProgram('${programId}')">
+                        ${isActive ? 'בשימוש עכשיו' : 'עבור לתוכנית הזאת'}
+                    </button>
+                </div>
+            </article>`;
+    }).join('');
+}
+
+let programModalReturnFocus = null;
+
+function setProgramModalBackgroundInert(isInert) {
+    [...document.body.children].forEach(element => {
+        if (element.id === 'program-modal' || element.tagName === 'SCRIPT') return;
+        if (isInert) {
+            if (!element.inert) element.dataset.programModalInert = 'added';
+            element.inert = true;
+        } else if (element.dataset.programModalInert === 'added') {
+            element.inert = false;
+            delete element.dataset.programModalInert;
+        }
+    });
+}
+
+function trapProgramModalFocus(event) {
+    const modal = document.getElementById('program-modal');
+    if (!modal.classList.contains('show') || event.key !== 'Tab') return false;
+    const focusable = [...modal.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+        .filter(element => !element.hidden && element.offsetParent !== null);
+    if (!focusable.length) {
+        event.preventDefault();
+        return true;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+    }
+    return true;
+}
+
+function openProgramModal() {
+    renderProgramModal();
+    const modal = document.getElementById('program-modal');
+    programModalReturnFocus = document.activeElement;
+    modal.classList.add('show');
+    setProgramModalBackgroundInert(true);
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => modal.querySelector('.program-modal-close')?.focus(), 0);
+}
+
+function closeProgramModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    const modal = document.getElementById('program-modal');
+    if (document.activeElement?.closest?.('#program-modal')) document.activeElement.blur();
+    modal.classList.remove('show');
+    setProgramModalBackgroundInert(false);
+    document.body.style.overflow = '';
+    (programModalReturnFocus || document.querySelector('.programs-trigger'))?.focus();
+    programModalReturnFocus = null;
+}
+
+function switchTrainingProgram(programId) {
+    const currentId = getActiveProgramId();
+    if (programId === currentId) {
+        closeProgramModal(null);
+        return;
+    }
+    const library = getProgramLibrary();
+    const target = hasKnownProgramProfile(library, programId) ? library.profiles[programId] : null;
+    if (!target || localStorage.getItem(profileStorageKey(programId, PROFILE_SLOTS.program)) === null) {
+        showToast('לא ניתן לפתוח את התוכנית');
+        return;
+    }
+    const targetName = target.name || PROGRAM_CONFIGS[programId]?.name || 'התוכנית שנבחרה';
+    if (!confirm(`לעבור אל "${targetName}"? התוכנית הנוכחית, המשקלים ויומן הביצועים יישמרו.`)) return;
+
+    try {
+        const notesEl = document.getElementById('general-notes-input');
+        if (notesEl) saveGeneralNotes(notesEl.value, true);
+        library.activeId = programId;
+        target.updatedAt = Date.now();
+        saveProgramLibrary(library);
+        activePerformanceEdit = null;
+        if (history.replaceState) history.replaceState(null, '', location.pathname + location.search);
+        location.reload();
+    } catch (error) {
+        showToast('המעבר נכשל. התוכנית הנוכחית נשמרה.');
+    }
 }
 
 function normalizeExerciseJournal(data) {
@@ -1521,12 +2585,19 @@ function normalizeExerciseJournal(data) {
 }
 
 function getExerciseJournal() {
-    try { return normalizeExerciseJournal(JSON.parse(localStorage.getItem(EXERCISE_JOURNAL_KEY))); }
+    try {
+        return normalizeExerciseJournal(JSON.parse(
+            localStorage.getItem(activeStorageKey(PROFILE_SLOTS.exerciseJournal, EXERCISE_JOURNAL_KEY))
+        ));
+    }
     catch { return {}; }
 }
 
 function saveExerciseJournal(journal) {
-    localStorage.setItem(EXERCISE_JOURNAL_KEY, JSON.stringify(normalizeExerciseJournal(journal)));
+    localStorage.setItem(
+        activeStorageKey(PROFILE_SLOTS.exerciseJournal, EXERCISE_JOURNAL_KEY),
+        JSON.stringify(normalizeExerciseJournal(journal))
+    );
 }
 
 function localTodayIso() {
@@ -1557,7 +2628,7 @@ function closeNotesPage(event) {
     if (document.activeElement?.closest?.('#notes-modal')) document.activeElement.blur();
     document.getElementById('notes-modal').classList.remove('show');
     document.body.style.overflow = '';
-    const activeDay = document.querySelector('.tab-btn.active')?.dataset.day || 'A';
+    const activeDay = document.querySelector('.tab-btn.active:not([hidden])')?.dataset.day || getProgramDayKeys()[0] || 'A';
     if (history.replaceState) history.replaceState(null, '', '#day-' + activeDay);
 }
 
@@ -1571,9 +2642,10 @@ function renderNotesPage(openJournalId) {
     const container = document.getElementById('exercise-notes-page');
     if (!container) return;
     const program = getProgram();
-    const activeJournalId = openJournalId || program.A?.exercises?.[0]?.journalId;
+    const dayKeys = getProgramDayKeys(program);
+    const activeJournalId = openJournalId || program[dayKeys[0]]?.exercises?.[0]?.journalId;
 
-    const daySections = ['A','B','C','D','E'].map(dayKey => {
+    const daySections = dayKeys.map(dayKey => {
         const day = program[dayKey];
         if (!day) return '';
         const exercises = day.exercises.map((exercise, exIdx) => {
@@ -1808,8 +2880,22 @@ function deletePerformanceEntry(dayKey, exIdx, entryIndex) {
     showToast('רשומת הביצוע נמחקה');
 }
 
+function setExerciseCardOpen(card, shouldOpen) {
+    if (!card) return;
+    card.classList.toggle('open', shouldOpen);
+    const header = card.querySelector('.exercise-header');
+    if (header) header.setAttribute('aria-expanded', String(shouldOpen));
+}
+
 function toggleExercise(header) {
-    header.closest('.exercise-card').classList.toggle('open');
+    const card = header.closest('.exercise-card');
+    setExerciseCardOpen(card, !card?.classList.contains('open'));
+}
+
+function handleExerciseHeaderKeydown(event, header) {
+    if (event.target !== header || (event.key !== 'Enter' && event.key !== ' ')) return;
+    event.preventDefault();
+    toggleExercise(header);
 }
 
 function toggleCheck(el) {
@@ -1840,7 +2926,18 @@ function updateExerciseName(dayKey, exIdx, newName) {
 
 function updateGroup(dayKey, exIdx, grpIdx, field, value) {
     const program = getProgram();
-    program[dayKey].exercises[exIdx].groups[grpIdx][field] = Math.max(1, parseInt(value) || 1);
+    const group = program[dayKey].exercises[exIdx].groups[grpIdx];
+    if (field === 'repsText') {
+        group.repsText = String(value || '').trim() || 'לפי תחושה';
+    } else {
+        const numericValue = Math.max(1, parseInt(value) || 1);
+        group[field] = field === 'repsMax'
+            ? Math.max(Number(group.reps) || 1, numericValue)
+            : numericValue;
+        if (field === 'reps' && group.repsMax && group.repsMax < numericValue) {
+            group.repsMax = numericValue;
+        }
+    }
     saveProgram(program);
     renderDay(dayKey);
     reopenCard(dayKey, exIdx);
@@ -1850,7 +2947,14 @@ function addGroup(dayKey, exIdx) {
     const program = getProgram();
     const groups = program[dayKey].exercises[exIdx].groups;
     const last = groups[groups.length - 1];
-    groups.push({ sets: last ? last.sets : 3, reps: last ? last.reps : 10 });
+    const newGroup = { sets: last?.sets || 3 };
+    if (last?.repsText) {
+        newGroup.repsText = last.repsText;
+    } else {
+        newGroup.reps = last?.reps || 10;
+        if (last?.repsMax) newGroup.repsMax = last.repsMax;
+    }
+    groups.push(newGroup);
     saveProgram(program);
     renderDay(dayKey);
     reopenCard(dayKey, exIdx);
@@ -1883,7 +2987,7 @@ function addExercise(dayKey) {
     const cards = document.querySelectorAll(`#day-${dayKey} .exercise-card`);
     const lastCard = cards[cards.length - 1];
     if (lastCard) {
-        lastCard.classList.add('open');
+        setExerciseCardOpen(lastCard, true);
         setTimeout(() => {
             const nameInput = lastCard.querySelector('.exercise-name-input');
             if (nameInput) { nameInput.focus(); nameInput.select(); }
@@ -1915,7 +3019,7 @@ function removeExercise(dayKey, exIdx) {
 function reopenCard(dayKey, exIdx, callback) {
     setTimeout(() => {
         const cards = document.querySelectorAll(`#day-${dayKey} .exercise-card`);
-        if (cards[exIdx]) cards[exIdx].classList.add('open');
+        if (cards[exIdx]) setExerciseCardOpen(cards[exIdx], true);
         if (callback) callback();
     }, 30);
 }
@@ -1930,25 +3034,25 @@ function saveWeights() {
     const history = getHistory();
     history.unshift({ date: new Date().toLocaleString('he-IL'), weights: { ...weights } });
     if (history.length > 50) history.pop();
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    saveHistoryData(history);
 
     showToast('המשקלים נשמרו בהצלחה!');
 }
 
 function clearCurrentWeights() {
-    if (!confirm('האם לאפס את כל המשקלים הנוכחיים?')) return;
-    localStorage.removeItem(WEIGHTS_KEY);
-    ['A','B','C','D','E'].forEach(renderDay);
-    showToast('המשקלים אופסו');
+    if (!confirm('האם לאפס את המשקלים בתוכנית הפעילה בלבד? המשקלים בתוכנית השנייה יישארו שמורים.')) return;
+    localStorage.removeItem(activeStorageKey(PROFILE_SLOTS.weights, WEIGHTS_KEY));
+    renderAllDays();
+    showToast('המשקלים בתוכנית הפעילה אופסו');
 }
 
 function resetProgram() {
-    if (!confirm('האם לשחזר את התוכנית המקורית? כל השינויים האישיים ויומן הביצועים יימחקו; דגשי ברירת המחדל ישוחזרו.')) return;
+    if (!confirm('האם לשחזר את התוכנית הפעילה למצב המקורי שלה? השינויים האישיים ויומן הביצועים בתוכנית הזאת יימחקו, אך המשקלים והתוכנית השנייה יישארו שמורים.')) return;
     activePerformanceEdit = null;
-    localStorage.removeItem(PROGRAM_KEY);
-    localStorage.removeItem(EXERCISE_JOURNAL_KEY);
-    ['A','B','C','D','E'].forEach(renderDay);
-    showToast('התוכנית שוחזרה למקור');
+    saveProgram(ensureExerciseJournalIds(cloneData(getProgramTemplate()), false));
+    localStorage.removeItem(activeStorageKey(PROFILE_SLOTS.exerciseJournal, EXERCISE_JOURNAL_KEY));
+    renderAllDays();
+    showToast('התוכנית הפעילה שוחזרה למקור');
 }
 
 function showToast(message) {
@@ -2110,17 +3214,36 @@ function closeTimerPanel(event) {
     document.getElementById('timer-panel').classList.remove('show');
 }
 
+function getProgramProfileBackup(programId) {
+    const fallbackTemplate = programId === NEW_AB_PROGRAM_ID ? newAbWorkoutData : defaultWorkoutData;
+    const template = readProfileSlot(programId, PROFILE_SLOTS.template, fallbackTemplate);
+    return {
+        program: readProfileSlot(programId, PROFILE_SLOTS.program, template),
+        template,
+        weights: readProfileSlot(programId, PROFILE_SLOTS.weights, {}),
+        history: readProfileSlot(programId, PROFILE_SLOTS.history, []),
+        exerciseJournal: normalizeExerciseJournal(readProfileSlot(programId, PROFILE_SLOTS.exerciseJournal, {})),
+        weightUnits: readProfileSlot(programId, PROFILE_SLOTS.weightUnits, {}),
+        generalNotes: readProfileSlot(programId, PROFILE_SLOTS.generalNotes, DEFAULT_GENERAL_NOTES)
+    };
+}
+
+function buildProgramProfilesBackup(library) {
+    const profiles = {};
+    Object.keys(library?.profiles || {}).forEach(programId => {
+        profiles[programId] = getProgramProfileBackup(programId);
+    });
+    return profiles;
+}
+
 function exportData() {
+    const library = getProgramLibrary();
     const data = {
-        backupVersion: 2,
-        program: getProgram(),
-        weights: getWeights(),
-        history: getHistory(),
-        generalNotes: getGeneralNotes(),
+        backupVersion: 3,
+        programLibrary: cloneData(library),
+        programProfiles: buildProgramProfilesBackup(library),
         timerPresets: getTimerPresets(),
-        exerciseJournal: getExerciseJournal(),
-        weightUnits: getWeightUnits(),
-        exportDate: new Date().toLocaleString('he-IL')
+        exportDate: new Date().toISOString()
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
@@ -2131,31 +3254,153 @@ function exportData() {
     showToast('הגיבוי הורד בהצלחה!');
 }
 
+function isPlainObject(value) {
+    return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function normalizeImportedProfile(profile, programId) {
+    if (!isPlainObject(profile) || !isPlainObject(profile.program)) throw new Error('Invalid profile program');
+    const program = ensureExerciseJournalIds(cloneData(profile.program), false);
+    const templateSource = isPlainObject(profile.template) ? profile.template : program;
+    return {
+        program,
+        template: ensureExerciseJournalIds(cloneData(templateSource), false),
+        weights: isPlainObject(profile.weights) ? cloneData(profile.weights) : {},
+        history: Array.isArray(profile.history) ? cloneData(profile.history) : [],
+        exerciseJournal: normalizeExerciseJournal(profile.exerciseJournal),
+        weightUnits: isPlainObject(profile.weightUnits) ? cloneData(profile.weightUnits) : {},
+        generalNotes: typeof profile.generalNotes === 'string' ? profile.generalNotes : DEFAULT_GENERAL_NOTES
+    };
+}
+
+function writeImportedProfile(programId, profile) {
+    writeProfileSlot(programId, PROFILE_SLOTS.program, profile.program);
+    writeProfileSlot(programId, PROFILE_SLOTS.template, profile.template);
+    writeProfileSlot(programId, PROFILE_SLOTS.weights, profile.weights);
+    writeProfileSlot(programId, PROFILE_SLOTS.history, profile.history);
+    writeProfileSlot(programId, PROFILE_SLOTS.exerciseJournal, profile.exerciseJournal);
+    writeProfileSlot(programId, PROFILE_SLOTS.weightUnits, profile.weightUnits);
+    writeProfileSlot(programId, PROFILE_SLOTS.generalNotes, profile.generalNotes);
+}
+
+function profileStorageKeys(programIds) {
+    return programIds.flatMap(programId => Object.values(PROFILE_SLOTS).map(slot => profileStorageKey(programId, slot)));
+}
+
+function runStorageTransaction(keys, action) {
+    const before = new Map(keys.map(key => [key, localStorage.getItem(key)]));
+    try {
+        return action();
+    } catch (error) {
+        let rollbackError = null;
+        keys.forEach(key => {
+            try { localStorage.removeItem(key); }
+            catch (restoreError) { rollbackError ||= restoreError; }
+        });
+        before.forEach((value, key) => {
+            if (value === null) return;
+            try {
+                localStorage.setItem(key, value);
+            } catch (restoreError) {
+                rollbackError ||= restoreError;
+            }
+        });
+        if (rollbackError) throw rollbackError;
+        throw error;
+    }
+}
+
+function importVersionThreeBackup(data) {
+    if (!isPlainObject(data.programLibrary) || !isPlainObject(data.programProfiles)) throw new Error('Invalid backup library');
+    const importedProfiles = {
+        [PREVIOUS_PROGRAM_ID]: normalizeImportedProfile(data.programProfiles[PREVIOUS_PROGRAM_ID], PREVIOUS_PROGRAM_ID),
+        [NEW_AB_PROGRAM_ID]: normalizeImportedProfile(data.programProfiles[NEW_AB_PROGRAM_ID], NEW_AB_PROGRAM_ID)
+    };
+    if (!confirm('הגיבוי כולל את שתי תוכניות האימון. לייבא אותו ולהחליף את נתוני שתי התוכניות השמורים במכשיר?')) return false;
+
+    const now = Date.now();
+    const requestedActiveId = data.programLibrary.activeId;
+    const library = {
+        version: 1,
+        createdAt: Number(data.programLibrary.createdAt) || now,
+        activeId: requestedActiveId === PREVIOUS_PROGRAM_ID || requestedActiveId === NEW_AB_PROGRAM_ID
+            ? requestedActiveId
+            : NEW_AB_PROGRAM_ID,
+        profiles: {
+            [PREVIOUS_PROGRAM_ID]: {
+                id: PREVIOUS_PROGRAM_ID,
+                name: PROGRAM_CONFIGS[PREVIOUS_PROGRAM_ID].name,
+                description: PROGRAM_CONFIGS[PREVIOUS_PROGRAM_ID].description,
+                createdAt: Number(data.programLibrary.profiles?.[PREVIOUS_PROGRAM_ID]?.createdAt) || now,
+                updatedAt: now
+            },
+            [NEW_AB_PROGRAM_ID]: {
+                id: NEW_AB_PROGRAM_ID,
+                name: PROGRAM_CONFIGS[NEW_AB_PROGRAM_ID].name,
+                description: PROGRAM_CONFIGS[NEW_AB_PROGRAM_ID].description,
+                createdAt: Number(data.programLibrary.profiles?.[NEW_AB_PROGRAM_ID]?.createdAt) || now,
+                updatedAt: now
+            }
+        }
+    };
+
+    return runStorageTransaction([
+        ...profileStorageKeys([PREVIOUS_PROGRAM_ID, NEW_AB_PROGRAM_ID]),
+        TIMER_PRESETS_KEY,
+        PROGRAM_LIBRARY_KEY
+    ], () => {
+        writeImportedProfile(PREVIOUS_PROGRAM_ID, importedProfiles[PREVIOUS_PROGRAM_ID]);
+        writeImportedProfile(NEW_AB_PROGRAM_ID, importedProfiles[NEW_AB_PROGRAM_ID]);
+        if (Array.isArray(data.timerPresets)) saveTimerPresets(data.timerPresets);
+        saveProgramLibrary(library);
+        return true;
+    });
+}
+
+function importLegacyBackup(data) {
+    if (!isPlainObject(data.program)) throw new Error('Invalid legacy backup');
+    if (!confirm('זהו גיבוי מהגרסה הישנה. הוא יישמר כ״התוכנית הקודמת״, כולל המשקלים והיומן, בלי למחוק את תוכנית A/B החדשה. להמשיך?')) return false;
+
+    const imported = normalizeImportedProfile({
+        program: data.program,
+        template: data.program,
+        weights: data.weights,
+        history: data.history,
+        exerciseJournal: data.exerciseJournal,
+        weightUnits: data.weightUnits,
+        generalNotes: data.generalNotes
+    }, PREVIOUS_PROGRAM_ID);
+    const library = getProgramLibrary();
+    if (!library?.profiles?.[PREVIOUS_PROGRAM_ID] || !library?.profiles?.[NEW_AB_PROGRAM_ID]) throw new Error('Missing program library');
+
+    return runStorageTransaction([
+        ...profileStorageKeys([PREVIOUS_PROGRAM_ID]),
+        TIMER_PRESETS_KEY,
+        PROGRAM_LIBRARY_KEY
+    ], () => {
+        writeImportedProfile(PREVIOUS_PROGRAM_ID, imported);
+        if (Array.isArray(data.timerPresets)) saveTimerPresets(data.timerPresets);
+        library.activeId = PREVIOUS_PROGRAM_ID;
+        library.profiles[PREVIOUS_PROGRAM_ID].updatedAt = Date.now();
+        saveProgramLibrary(library);
+        return true;
+    });
+}
+
 function importData(event) {
     const file = event.target.files[0];
     if (!file) return;
-    if (!confirm('האם לייבא את הגיבוי? זה יחליף את כל הנתונים הנוכחיים.')) {
-        event.target.value = '';
-        return;
-    }
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
             const data = JSON.parse(e.target.result);
-            if (data.program) localStorage.setItem(PROGRAM_KEY, JSON.stringify(data.program));
-            if (data.weights) localStorage.setItem(WEIGHTS_KEY, JSON.stringify(data.weights));
-            if (data.history) localStorage.setItem(HISTORY_KEY, JSON.stringify(data.history));
-            if (data.generalNotes != null) localStorage.setItem(GENERAL_NOTES_KEY, data.generalNotes);
-            if (data.timerPresets && Array.isArray(data.timerPresets)) saveTimerPresets(data.timerPresets);
-            if (data.exerciseJournal && typeof data.exerciseJournal === 'object') saveExerciseJournal(data.exerciseJournal);
-            else localStorage.removeItem(EXERCISE_JOURNAL_KEY);
-            if (data.weightUnits) saveWeightUnits(data.weightUnits);
-            ['A','B','C','D','E'].forEach(renderDay);
-            var notesEl = document.getElementById('general-notes-input');
-            notesEl.value = getGeneralNotes();
-            resizeGeneralNotes(notesEl);
-            if (document.getElementById('notes-modal').classList.contains('show')) renderNotesPage();
-            showToast('הגיבוי יובא ונשמר במכשיר בלבד!');
+            const imported = Number(data.backupVersion) >= 3
+                ? importVersionThreeBackup(data)
+                : importLegacyBackup(data);
+            if (imported) {
+                showToast('הגיבוי יובא ונשמר במכשיר בלבד!');
+                setTimeout(() => location.reload(), 250);
+            }
         } catch {
             showToast('שגיאה בקריאת הקובץ');
         }
@@ -2168,18 +3413,25 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 
+initializeProgramLibrary();
+applyActiveProgramTheme();
 var generalNotesEl = document.getElementById('general-notes-input');
 generalNotesEl.value = getGeneralNotes();
 resizeGeneralNotes(generalNotesEl);
-['A','B','C','D','E'].forEach(renderDay);
+renderAllDays();
 timerRemaining = getTimerPresets()[0] || 90;
 updateTimerDisplay();
 const initialHash = location.hash;
 const initialTabMatch = initialHash.match(/^#day-([A-E])$/);
+const availableDayKeys = getProgramDayKeys();
+const requestedInitialDay = initialTabMatch && availableDayKeys.includes(initialTabMatch[1])
+    ? initialTabMatch[1]
+    : null;
 const todayWorkoutDay = workoutDayForDate();
 markTodayWorkout(todayWorkoutDay);
-if (initialTabMatch) switchTab(initialTabMatch[1], false);
+if (requestedInitialDay) switchTab(requestedInitialDay, false);
 else if (todayWorkoutDay) switchTab(todayWorkoutDay, false);
+else if (availableDayKeys[0]) switchTab(availableDayKeys[0], false);
 if (initialHash === '#notes') openNotesPage();
 
 const NVIDIA_KEY_STORAGE = 'training_nvidia_key';
@@ -2240,12 +3492,13 @@ function saveNvidiaModel(model) {
 function buildWorkoutContext() {
     const program = getProgram();
     const parts = ['תוכנית האימונים של המשתמש:'];
-    ['A','B','C','D','E'].forEach(day => {
+    getProgramDayKeys(program).forEach(day => {
         const d = program[day];
         if (!d) return;
         const exercises = d.exercises.map((e, i) => {
-            const sets = e.groups.map(g => g.sets + 'x' + g.reps).join(' + ');
-            return (i + 1) + '. ' + e.name + ' (' + sets + ')';
+            const sets = e.groups.map(groupPrescriptionText).join(' + ');
+            const alternative = e.prescriptionNote ? ' — ' + e.prescriptionNote : '';
+            return (i + 1) + '. ' + e.name + ' (' + sets + ')' + alternative;
         }).join('\n');
         parts.push(d.title + ':\n' + exercises);
     });
@@ -2600,9 +3853,12 @@ function changeVideo(btn, direction) {
 setupAiChat();
 
 document.addEventListener('keydown', event => {
+    if (trapProgramModalFocus(event)) return;
     if (event.key !== 'Escape') return;
     if (document.getElementById('notes-modal').classList.contains('show')) {
         closeNotesPage(null);
+    } else if (document.getElementById('program-modal').classList.contains('show')) {
+        closeProgramModal(null);
     } else if (document.querySelector('.performance-form:not([hidden])')) {
         const openForm = document.querySelector('.performance-form:not([hidden])');
         closePerformanceForm(openForm.id.replace(/-form$/, ''));
