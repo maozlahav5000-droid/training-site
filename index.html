@@ -357,6 +357,89 @@
 
         .exercise-body-inner { padding: 0 20px 16px; border-top: 1px solid var(--border-color); padding-top: 16px; }
 
+        .sr-only {
+            position: absolute !important; width: 1px !important; height: 1px !important;
+            padding: 0 !important; margin: -1px !important; overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important;
+        }
+
+        .exercise-rest-timer {
+            position: relative; display: grid;
+            grid-template-columns: auto minmax(48px, 1fr) auto 44px;
+            align-items: center; gap: 8px; min-height: 54px;
+            margin-block: 12px 0; padding: 5px 8px 7px;
+            border: 1px solid rgba(45,212,191,0.14); border-radius: 11px;
+            background: rgba(8,145,178,0.045); overflow: hidden;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+        .exercise-rest-meta {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--text-muted); font-size: 0.78rem; font-weight: 600; white-space: nowrap;
+        }
+        .exercise-rest-meta svg { inline-size: 15px; block-size: 15px; color: #5eead4; }
+        .exercise-rest-display {
+            justify-self: start; color: #99f6e4; font-size: 1.05rem; font-weight: 800;
+            font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; line-height: 1;
+        }
+        .exercise-rest-toggle,
+        .exercise-rest-reset {
+            min-block-size: 44px; border-radius: 9px; font-family: 'Heebo', sans-serif;
+            font-weight: 700; cursor: pointer; transition: background-color 0.18s ease,
+            border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+        }
+        .exercise-rest-toggle {
+            min-inline-size: 66px; padding-inline: 12px; border: 1px solid rgba(45,212,191,0.28);
+            background: rgba(45,212,191,0.08); color: #99f6e4; font-size: 0.82rem;
+        }
+        .exercise-rest-reset {
+            inline-size: 44px; padding: 0; border: 1px solid rgba(148,163,184,0.14);
+            background: rgba(255,255,255,0.025); color: var(--text-muted); font-size: 1.12rem;
+        }
+        .exercise-rest-reset:disabled { opacity: 0.38; cursor: default; }
+        .exercise-rest-toggle:active,
+        .exercise-rest-reset:not(:disabled):active { transform: scale(0.96); }
+        .exercise-rest-progress {
+            position: absolute; inset-inline: 0; inset-block-end: 0; block-size: 2px;
+            background: rgba(148,163,184,0.08); overflow: hidden;
+        }
+        .exercise-rest-progress-fill {
+            display: block; inline-size: 100%; block-size: 100%; background: #2dd4bf;
+            transform: scaleX(var(--rest-progress, 1)); transform-origin: right center;
+            transition: transform 0.45s linear, background-color 0.2s ease;
+        }
+        .exercise-rest-timer[data-state="running"] {
+            border-color: rgba(45,212,191,0.34); background: rgba(13,148,136,0.075);
+        }
+        .exercise-rest-timer[data-state="running"] .exercise-rest-toggle {
+            background: rgba(45,212,191,0.16); border-color: rgba(94,234,212,0.42); color: #ccfbf1;
+        }
+        .exercise-rest-timer[data-state="paused"] {
+            border-color: rgba(251,191,36,0.28); background: rgba(251,191,36,0.045);
+        }
+        .exercise-rest-timer[data-state="paused"] .exercise-rest-display { color: #fcd34d; }
+        .exercise-rest-timer[data-state="paused"] .exercise-rest-progress-fill { background: #fbbf24; }
+        .exercise-rest-timer[data-state="warning"] {
+            border-color: rgba(251,146,60,0.38); background: rgba(251,146,60,0.055);
+        }
+        .exercise-rest-timer[data-state="warning"] .exercise-rest-display { color: #fdba74; }
+        .exercise-rest-timer[data-state="warning"] .exercise-rest-progress-fill { background: #fb923c; }
+        .exercise-rest-timer[data-state="done"] {
+            border-color: rgba(74,222,128,0.38); background: rgba(74,222,128,0.06);
+        }
+        .exercise-rest-timer[data-state="done"] .exercise-rest-display { color: #86efac; }
+        .exercise-rest-timer[data-state="done"] .exercise-rest-progress-fill { background: #4ade80; }
+
+        @media (hover: hover) {
+            .exercise-rest-toggle:hover { border-color: rgba(94,234,212,0.58); background: rgba(45,212,191,0.14); }
+            .exercise-rest-reset:not(:disabled):hover { border-color: rgba(94,234,212,0.34); color: #99f6e4; }
+        }
+
+        @media (max-width: 380px) {
+            .exercise-rest-timer { grid-template-columns: auto minmax(44px, 1fr) auto 44px; gap: 6px; padding-inline: 7px; }
+            .exercise-rest-meta span { display: none; }
+            .exercise-rest-toggle { min-inline-size: 60px; padding-inline: 9px; }
+        }
+
         .sets-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
 
         .set-row {
@@ -1359,6 +1442,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         <span id="toast-text"></span>
     </div>
+    <p id="timer-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
 
     <div class="history-modal-overlay" id="history-modal" onclick="closeHistory(event)">
         <div class="history-modal">
@@ -1744,6 +1828,26 @@ const PROFILE_STORAGE_PREFIX = 'training_profile_v1';
 const PREVIOUS_PROGRAM_ID = 'previous-5-day';
 const NEW_AB_PROGRAM_ID = 'ab-4-day';
 const ALL_DAY_KEYS = Object.freeze(['A', 'B', 'C', 'D', 'E']);
+const AB_REST_SECONDS_BY_JOURNAL_ID = Object.freeze({
+    'ab4-A-barbell-squat': 180,
+    'ab4-A-leg-press': 120,
+    'ab4-A-leg-extension': 75,
+    'ab4-A-calf-raise': 75,
+    'ab4-A-bench-press': 180,
+    'ab4-A-incline-dumbbell-press': 120,
+    'ab4-A-cable-fly': 75,
+    'ab4-A-triceps-pushdown': 75,
+    'ab4-A-overhead-triceps-extension': 75,
+    'ab4-B-pull-ups': 180,
+    'ab4-B-dumbbell-pullover': 75,
+    'ab4-B-machine-row': 120,
+    'ab4-B-military-press': 180,
+    'ab4-B-lateral-raise': 75,
+    'ab4-B-face-pull': 75,
+    'ab4-B-incline-dumbbell-curl': 75,
+    'ab4-B-spider-curl': 75,
+    'ab4-B-cable-hammer-curl': 75
+});
 const PROFILE_SLOTS = Object.freeze({
     program: 'program',
     template: 'template',
@@ -2282,6 +2386,41 @@ function renderPerformanceLog(dayKey, exIdx, exercise) {
         </section>`;
 }
 
+function getExerciseRestSeconds(exercise) {
+    if (getActiveProgramId() !== NEW_AB_PROGRAM_ID) return null;
+    return AB_REST_SECONDS_BY_JOURNAL_ID[exercise?.journalId] || null;
+}
+
+function renderExerciseRestTimer(exercise) {
+    const seconds = getExerciseRestSeconds(exercise);
+    if (!seconds) return '';
+    const journalId = escapeHtmlAttr(exercise.journalId);
+    const exerciseName = escapeHtmlAttr(exercise.name || 'התרגיל');
+    const formattedTime = formatTimer(seconds);
+    return `
+        <div class="exercise-rest-timer" role="group" aria-label="טיימר מנוחה ל${exerciseName}"
+             data-journal-id="${journalId}" data-duration="${seconds}" data-exercise-name="${exerciseName}"
+             data-state="idle" style="--rest-progress:1">
+            <span class="exercise-rest-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path>
+                </svg>
+                <span>מנוחה</span>
+            </span>
+            <output class="exercise-rest-display" role="timer" aria-live="off" dir="ltr">${formattedTime}</output>
+            <button type="button" class="exercise-rest-toggle"
+                    aria-label="התחל טיימר מנוחה ל${exerciseName}"
+                    onclick="toggleExerciseRestTimer(this)">התחל</button>
+            <button type="button" class="exercise-rest-reset" disabled
+                    aria-label="איפוס טיימר המנוחה ל${exerciseName}"
+                    onclick="resetExerciseRestTimer(this)" title="איפוס">↻</button>
+            <span class="exercise-rest-progress" aria-hidden="true">
+                <span class="exercise-rest-progress-fill"></span>
+            </span>
+        </div>`;
+}
+
 function renderDay(dayKey) {
     const program = getProgram();
     const day = program[dayKey];
@@ -2321,7 +2460,7 @@ function renderDay(dayKey) {
                 <button class="remove-exercise-btn" onclick="event.stopPropagation(); removeExercise('${dayKey}', ${exIdx})" title="הסר תרגיל"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
                 <svg class="exercise-toggle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
-            <div class="exercise-body" id="exercise-body-${dayKey}-${exIdx}">
+            <div class="exercise-body" id="exercise-body-${dayKey}-${exIdx}" inert aria-hidden="true">
                 <div class="exercise-body-inner">
                     <div style="margin-bottom:12px">
                         <input type="text" class="exercise-name-input" value="${escapeHtmlAttr(exercise.name)}" dir="auto"
@@ -2380,6 +2519,7 @@ function renderDay(dayKey) {
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                         הוסף שורת סטים
                     </button>
+                    ${renderExerciseRestTimer(exercise)}
                     ${renderPerformanceLog(dayKey, exIdx, exercise)}
                 </div>
             </div>
@@ -2395,6 +2535,7 @@ function renderDay(dayKey) {
     `;
 
     container.innerHTML = html;
+    syncExerciseRestTimers();
 }
 
 function workoutDayForDate(date = new Date()) {
@@ -2885,6 +3026,11 @@ function setExerciseCardOpen(card, shouldOpen) {
     card.classList.toggle('open', shouldOpen);
     const header = card.querySelector('.exercise-header');
     if (header) header.setAttribute('aria-expanded', String(shouldOpen));
+    const body = card.querySelector('.exercise-body');
+    if (body) {
+        body.toggleAttribute('inert', !shouldOpen);
+        body.setAttribute('aria-hidden', String(!shouldOpen));
+    }
 }
 
 function toggleExercise(header) {
@@ -3055,11 +3201,17 @@ function resetProgram() {
     showToast('התוכנית הפעילה שוחזרה למקור');
 }
 
+let toastTimeout = null;
+
 function showToast(message) {
     const toast = document.getElementById('toast');
     document.getElementById('toast-text').textContent = message;
     toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
+    if (toastTimeout !== null) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+        toastTimeout = null;
+    }, 2500);
 }
 
 function showHistory() {
@@ -3103,68 +3255,255 @@ function closeHistory(event) {
 
 // ——— Timer ———
 let timerRemaining = 90;
+let timerDuration = 90;
 let timerInterval = null;
+let timerEndAt = 0;
+let timerPhase = 'idle';
+let timerExerciseJournalId = null;
+let timerExerciseName = '';
+let timerCompletionNotified = false;
+let timerAudioContext = null;
 
 function formatTimer(seconds) {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
+    const safeSeconds = Math.max(0, Math.ceil(Number(seconds) || 0));
+    const m = Math.floor(safeSeconds / 60);
+    const s = safeSeconds % 60;
     return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+function formatTimerForSpeech(seconds) {
+    const safeSeconds = Math.max(0, Math.ceil(Number(seconds) || 0));
+    const minutes = Math.floor(safeSeconds / 60);
+    const remainingSeconds = safeSeconds % 60;
+    const parts = [];
+    if (minutes === 1) parts.push('דקה אחת');
+    else if (minutes > 1) parts.push(`${minutes} דקות`);
+    if (remainingSeconds === 1) parts.push('שנייה אחת');
+    else if (remainingSeconds > 1) parts.push(`${remainingSeconds} שניות`);
+    return parts.join(' ו־') || '0 שניות';
+}
+
+function announceTimerStatus(message) {
+    const status = document.getElementById('timer-status');
+    if (!status) return;
+    status.textContent = '';
+    requestAnimationFrame(() => { status.textContent = message; });
+}
+
+function prepareTimerAudio() {
+    try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        if (!timerAudioContext) timerAudioContext = new AudioContextClass();
+        if (timerAudioContext.state === 'suspended') timerAudioContext.resume().catch(() => {});
+    } catch {}
+}
+
+function playTimerCompletionSound() {
+    try {
+        if (!timerAudioContext || timerAudioContext.state !== 'running') return;
+        const now = timerAudioContext.currentTime;
+        const oscillator = timerAudioContext.createOscillator();
+        const gain = timerAudioContext.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(880, now);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.11, now + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.34);
+        oscillator.connect(gain).connect(timerAudioContext.destination);
+        oscillator.start(now);
+        oscillator.stop(now + 0.35);
+    } catch {}
+}
+
+function notifyTimerFinished() {
+    if (timerCompletionNotified) return;
+    timerCompletionNotified = true;
+    showToast('המנוחה הסתיימה');
+    announceTimerStatus('זמן המנוחה הסתיים');
+    try { navigator.vibrate?.([150, 80, 150]); } catch {}
+    playTimerCompletionSound();
+}
+
+function timerStateForExercise(isActive) {
+    if (!isActive) return 'idle';
+    if (timerPhase === 'running' && timerRemaining <= 10) return 'warning';
+    return timerPhase;
+}
+
+function syncExerciseRestTimers() {
+    let activeTimerFound = false;
+    document.querySelectorAll('.exercise-rest-timer').forEach(timer => {
+        const duration = Math.max(1, parseInt(timer.dataset.duration, 10) || 1);
+        const isActive = Boolean(timerExerciseJournalId)
+            && timer.dataset.journalId === timerExerciseJournalId;
+        const seconds = isActive ? Math.max(0, timerRemaining) : duration;
+        const state = timerStateForExercise(isActive);
+        const display = timer.querySelector('.exercise-rest-display');
+        const toggle = timer.querySelector('.exercise-rest-toggle');
+        const reset = timer.querySelector('.exercise-rest-reset');
+        const exerciseName = timer.dataset.exerciseName || 'התרגיל';
+        const isRunning = state === 'running' || state === 'warning';
+        const action = isRunning ? 'השהה' : state === 'paused' ? 'המשך' : 'התחל';
+
+        if (isActive) {
+            activeTimerFound = true;
+            timerExerciseName = exerciseName;
+        }
+        timer.dataset.state = state;
+        timer.style.setProperty('--rest-progress', String(Math.min(1, seconds / duration)));
+        if (display) display.textContent = formatTimer(seconds);
+        if (toggle) {
+            if (toggle.textContent !== action) toggle.textContent = action;
+            const actionLabel = `${action} טיימר מנוחה ל${exerciseName}`;
+            if (toggle.getAttribute('aria-label') !== actionLabel) toggle.setAttribute('aria-label', actionLabel);
+        }
+        if (reset) reset.disabled = !isActive || state === 'idle';
+    });
+
+    if (timerExerciseJournalId && !activeTimerFound) {
+        clearTimerInterval();
+        timerExerciseJournalId = null;
+        timerExerciseName = '';
+        timerDuration = getTimerPresets()[0] || 90;
+        timerRemaining = timerDuration;
+        timerPhase = 'idle';
+        timerCompletionNotified = false;
+        const globalDisplay = document.getElementById('timer-display');
+        const globalStart = document.getElementById('timer-start-btn');
+        if (globalDisplay) {
+            globalDisplay.textContent = formatTimer(timerRemaining);
+            globalDisplay.classList.remove('warning', 'done');
+        }
+        if (globalStart) globalStart.textContent = 'התחל';
+        announceTimerStatus('טיימר המנוחה בוטל כי התרגיל הוסר');
+    }
 }
 
 function updateTimerDisplay() {
     const el = document.getElementById('timer-display');
-    if (!el) return;
-    el.textContent = formatTimer(timerRemaining);
-    el.classList.remove('warning', 'done');
-    if (timerRemaining <= 10 && timerRemaining > 0) el.classList.add('warning');
-    if (timerRemaining === 0) el.classList.add('done');
+    if (el) {
+        el.textContent = formatTimer(timerRemaining);
+        el.classList.remove('warning', 'done');
+        if (timerRemaining <= 10 && timerRemaining > 0) el.classList.add('warning');
+        if (timerRemaining === 0) el.classList.add('done');
+    }
+    const startButton = document.getElementById('timer-start-btn');
+    if (startButton) {
+        startButton.textContent = timerPhase === 'running'
+            ? 'השהה'
+            : (timerPhase === 'paused' ? 'המשך' : 'התחל');
+    }
+    syncExerciseRestTimers();
+}
+
+function clearTimerInterval() {
+    if (timerInterval !== null) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    timerEndAt = 0;
 }
 
 function timerTick() {
+    if (timerInterval === null) return;
+    timerRemaining = Math.max(0, Math.ceil((timerEndAt - Date.now()) / 1000));
     if (timerRemaining <= 0) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-        document.getElementById('timer-start-btn').textContent = 'התחל';
+        clearTimerInterval();
+        timerRemaining = 0;
+        timerPhase = 'done';
+        updateTimerDisplay();
+        notifyTimerFinished();
         return;
     }
-    timerRemaining--;
+    updateTimerDisplay();
+}
+
+function startTimerCountdown() {
+    if (timerRemaining <= 0) timerRemaining = timerDuration || 90;
+    timerCompletionNotified = false;
+    timerEndAt = Date.now() + timerRemaining * 1000;
+    timerPhase = 'running';
+    timerInterval = setInterval(timerTick, 250);
     updateTimerDisplay();
 }
 
 function timerStartPause() {
-    const btn = document.getElementById('timer-start-btn');
-    if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-        btn.textContent = 'המשך';
+    prepareTimerAudio();
+    const timerLabel = timerExerciseName ? ` ל${timerExerciseName}` : '';
+    if (timerInterval !== null) {
+        timerRemaining = Math.max(0, Math.ceil((timerEndAt - Date.now()) / 1000));
+        clearTimerInterval();
+        if (timerRemaining <= 0) {
+            timerRemaining = 0;
+            timerPhase = 'done';
+            updateTimerDisplay();
+            notifyTimerFinished();
+            return;
+        }
+        timerPhase = 'paused';
+        announceTimerStatus(`טיימר המנוחה${timerLabel} הושהה על ${formatTimerForSpeech(timerRemaining)}`);
     } else {
-        if (timerRemaining <= 0) timerRemaining = 90;
-        btn.textContent = 'השהה';
-        timerInterval = setInterval(timerTick, 1000);
+        const isResume = timerPhase === 'paused';
+        startTimerCountdown();
+        announceTimerStatus(`טיימר המנוחה${timerLabel} ${isResume ? 'ממשיך' : 'התחיל'}, ${formatTimerForSpeech(timerRemaining)}`);
     }
     updateTimerDisplay();
 }
 
 function timerReset() {
-    if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
+    clearTimerInterval();
+    if (timerExerciseJournalId) {
+        timerRemaining = timerDuration || 90;
+    } else {
+        const presets = getTimerPresets();
+        timerDuration = presets[0] || 90;
+        timerRemaining = timerDuration;
     }
-    const presets = getTimerPresets();
-    timerRemaining = presets[0] || 90;
-    document.getElementById('timer-start-btn').textContent = 'התחל';
+    timerPhase = 'idle';
+    timerCompletionNotified = false;
     updateTimerDisplay();
+    announceTimerStatus(`טיימר המנוחה אופס ל־${formatTimerForSpeech(timerRemaining)}`);
 }
 
 function timerSet(seconds) {
-    if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-    }
-    timerRemaining = Math.max(0, parseInt(seconds) || 0);
-    document.getElementById('timer-start-btn').textContent = 'התחל';
+    clearTimerInterval();
+    timerDuration = Math.max(1, parseInt(seconds, 10) || 1);
+    timerRemaining = timerDuration;
+    timerExerciseJournalId = null;
+    timerExerciseName = '';
+    timerPhase = 'idle';
+    timerCompletionNotified = false;
     updateTimerDisplay();
+    announceTimerStatus(`טיימר המנוחה הוגדר ל־${formatTimerForSpeech(timerRemaining)}`);
 }
+
+function toggleExerciseRestTimer(button) {
+    const timer = button?.closest('.exercise-rest-timer');
+    if (!timer) return;
+    const journalId = timer.dataset.journalId;
+    const duration = Math.max(1, parseInt(timer.dataset.duration, 10) || 1);
+    if (timerExerciseJournalId !== journalId || timerDuration !== duration) {
+        clearTimerInterval();
+        timerExerciseJournalId = journalId;
+        timerExerciseName = timer.dataset.exerciseName || 'התרגיל';
+        timerDuration = duration;
+        timerRemaining = duration;
+        timerPhase = 'idle';
+        timerCompletionNotified = false;
+    }
+    timerStartPause();
+}
+
+function resetExerciseRestTimer(button) {
+    const timer = button?.closest('.exercise-rest-timer');
+    if (!timer || timer.dataset.journalId !== timerExerciseJournalId) return;
+    timerReset();
+}
+
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && timerInterval !== null) timerTick();
+});
 
 function timerSavePreset() {
     const min = parseInt(document.getElementById('timer-custom-min').value) || 0;
@@ -3419,7 +3758,8 @@ var generalNotesEl = document.getElementById('general-notes-input');
 generalNotesEl.value = getGeneralNotes();
 resizeGeneralNotes(generalNotesEl);
 renderAllDays();
-timerRemaining = getTimerPresets()[0] || 90;
+timerDuration = getTimerPresets()[0] || 90;
+timerRemaining = timerDuration;
 updateTimerDisplay();
 const initialHash = location.hash;
 const initialTabMatch = initialHash.match(/^#day-([A-E])$/);
