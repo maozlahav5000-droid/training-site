@@ -225,39 +225,61 @@
         .journal-edit-cancel:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.22); }
 
         .performance-log {
-            margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-color);
+            position: relative; margin-block-start: 22px; padding: 15px;
+            border: 1px solid rgba(245,158,11,0.36); border-radius: var(--radius-md);
+            background: linear-gradient(145deg, rgba(120,53,15,0.19), rgba(30,24,18,0.22)), var(--bg-secondary);
+            box-shadow: 0 10px 26px rgba(0,0,0,0.16), inset 0 1px rgba(255,255,255,0.035);
+        }
+        .performance-log::before {
+            content: ''; position: absolute; inset-block: 0; inset-inline-start: 0; inline-size: 3px;
+            background: linear-gradient(180deg, #fbbf24, #d97706);
         }
         .performance-log-header {
-            display: flex; align-items: center; justify-content: space-between; gap: 10px;
-            margin-bottom: 10px;
+            display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+            margin-block-end: 13px; padding-block-end: 12px;
+            border-block-end: 1px solid rgba(251,191,36,0.2);
         }
-        .performance-log-title {
-            display: flex; align-items: center; gap: 7px; color: var(--accent-cyan);
-            font-size: 0.92rem; font-weight: 700;
+        .performance-log-heading { display: flex; align-items: flex-start; gap: 10px; min-inline-size: 0; }
+        .performance-log-icon {
+            display: grid; place-items: center; inline-size: 30px; block-size: 30px; flex: 0 0 30px;
+            border: 1px solid rgba(253,230,138,0.28); border-radius: 9px;
+            background: rgba(180,83,9,0.18); color: #fde68a;
+        }
+        .performance-log-icon svg { inline-size: 16px; block-size: 16px; }
+        .performance-log-copy { min-inline-size: 0; }
+        .performance-log-title { color: #fef3c7; font-size: 1rem; font-weight: 800; line-height: 1.25; }
+        .performance-log-subtitle {
+            margin-block-start: 3px; color: var(--text-secondary); font-size: 0.78rem; line-height: 1.45;
         }
         .performance-log-count {
-            padding: 4px 8px; border-radius: 999px; background: rgba(45,212,191,0.08);
-            color: var(--text-muted); font-size: 0.75rem;
+            flex-shrink: 0; padding: 4px 9px; border: 1px solid rgba(253,230,138,0.2);
+            border-radius: 999px; background: rgba(180,83,9,0.16);
+            color: #fde68a; font-size: 0.75rem; font-weight: 600;
         }
         .performance-form {
-            padding: 12px; border-radius: var(--radius-sm); background: rgba(8,145,178,0.05);
-            border: 1px solid rgba(45,212,191,0.14);
+            padding: 12px; border-radius: var(--radius-sm); background: rgba(120,53,15,0.12);
+            border: 1px solid rgba(245,158,11,0.22);
         }
         .performance-form[hidden], .performance-add-launch[hidden] { display: none; }
         .performance-add-launch { display: flex; justify-content: flex-start; }
         .performance-add-toggle { display: inline-flex; align-items: center; gap: 6px; }
         .performance-add-toggle span { font-size: 1rem; line-height: 1; }
+        .performance-log .journal-add-btn {
+            background: linear-gradient(135deg, #92400e, #b45309);
+            box-shadow: 0 4px 12px rgba(146,64,14,0.27);
+        }
+        .performance-log :focus-visible { outline: 3px solid #fbbf24; outline-offset: 3px; }
         .performance-form-grid {
             display: grid; grid-template-columns: minmax(145px, 0.9fr) minmax(155px, 0.8fr) minmax(100px, 0.55fr);
             gap: 10px; align-items: start;
         }
         .performance-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-        .performance-field > span:first-child { color: var(--text-muted); font-size: 0.78rem; font-weight: 600; }
+        .performance-field > span:first-child { color: var(--text-secondary); font-size: 0.78rem; font-weight: 600; }
         .performance-feeling-field { grid-column: 1 / -1; }
         .performance-input,
         .performance-select,
         .performance-textarea {
-            width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+            width: 100%; border: 1px solid rgba(245,158,11,0.22); border-radius: var(--radius-sm);
             background: var(--bg-primary); color: var(--text-primary); font-family: 'Heebo', sans-serif;
             font-size: 0.9rem; outline: none;
         }
@@ -269,26 +291,28 @@
         }
         .performance-input:focus,
         .performance-select:focus,
-        .performance-textarea:focus { border-color: #14b8a6; box-shadow: 0 0 0 3px rgba(20,184,166,0.12); }
+        .performance-textarea:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.14); }
         .performance-weight-control { display: grid; grid-template-columns: minmax(0, 1fr) 68px; gap: 6px; }
         .performance-form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
         .performance-entries { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
         .performance-entry {
             position: relative; padding: 12px 14px; border-radius: var(--radius-sm);
-            background: var(--bg-secondary); border: 1px solid var(--border-color);
+            background: rgba(22,15,8,0.55); border: 1px solid rgba(245,158,11,0.19);
         }
-        .performance-entry.is-editing { border-color: rgba(45,212,191,0.35); }
+        .performance-entry.is-editing { border-color: rgba(245,158,11,0.45); }
         .performance-entry-main { padding-inline-end: 62px; }
         .performance-entry-meta {
             display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 7px;
         }
-        .performance-entry-date { color: #5eead4; font-size: 0.8rem; font-weight: 700; direction: ltr; unicode-bidi: isolate; }
+        .performance-entry-date { color: #fde68a; font-size: 0.8rem; font-weight: 700; direction: ltr; unicode-bidi: isolate; }
         .performance-entry-stat {
-            padding: 3px 8px; border-radius: 999px; background: rgba(67,97,238,0.1);
+            padding: 3px 8px; border-radius: 999px; background: rgba(180,83,9,0.19);
             color: var(--text-secondary); font-size: 0.78rem; unicode-bidi: isolate;
         }
         .performance-entry-feeling {
             display: block; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.65;
+            margin-block-start: 8px; padding-block-start: 8px;
+            border-block-start: 1px dashed rgba(245,158,11,0.15);
             white-space: pre-wrap; unicode-bidi: plaintext; text-align: start;
         }
         .performance-entry-actions {
@@ -298,9 +322,12 @@
             width: 27px; height: 27px; border: none; border-radius: 7px;
             background: transparent; color: var(--text-muted); cursor: pointer; font-size: 0.9rem;
         }
-        .performance-entry-edit:hover { background: rgba(45,212,191,0.12); color: #5eead4; }
+        .performance-entry-edit:hover { background: rgba(245,158,11,0.14); color: #fde68a; }
         .performance-entry-delete:hover { background: rgba(255,82,82,0.12); color: var(--accent-red); }
-        .performance-empty { color: var(--text-muted); font-size: 0.84rem; }
+        .performance-empty {
+            padding: 12px; border: 1px dashed rgba(245,158,11,0.22); border-radius: var(--radius-sm);
+            background: rgba(120,53,15,0.09); color: var(--text-secondary); font-size: 0.84rem;
+        }
 
         .day-header { margin-bottom: 20px; }
         .day-header h2 { font-size: 1.65rem; font-weight: 700; margin-bottom: 4px; }
@@ -816,6 +843,15 @@
             .notes-modal { width: 100%; max-height: 100vh; border-radius: 0; padding: 14px 12px 24px; }
             .performance-form-grid { grid-template-columns: 1fr; }
             .performance-feeling-field { grid-column: auto; }
+            .performance-log { padding: 12px; }
+            .performance-add-launch, .performance-add-toggle { inline-size: 100%; }
+            .performance-add-toggle { justify-content: center; min-block-size: 44px; }
+            .performance-entry-main { padding-inline-end: 0; }
+            .performance-entry-actions {
+                position: static; justify-content: flex-end; margin-block-start: 9px;
+                padding-block-start: 8px; border-block-start: 1px solid rgba(245,158,11,0.13);
+            }
+            .performance-entry-action { inline-size: 40px; block-size: 40px; }
             .exercise-header { padding: 12px 14px; }
             .exercise-name { font-size: 1rem; }
             .set-row { flex-wrap: wrap; gap: 8px; }
@@ -1054,9 +1090,6 @@
             background: rgba(13,148,136,0.07);
             border-inline-start-color: #14b8a6;
         }
-        html[data-program-theme="ab"] .performance-entry-stat {
-            background: rgba(13,148,136,0.12);
-        }
         html[data-program-theme="ab"] .btn-primary {
             box-shadow: 0 4px 16px rgba(13,148,136,0.3);
         }
@@ -1202,6 +1235,17 @@
         html[data-program-theme="ab"] .ai-chat-input-bar input,
         html[data-program-theme="ab"] .timer-save-row input {
             border-color: var(--control-border);
+        }
+        html[data-program-theme="ab"] .performance-log .performance-input,
+        html[data-program-theme="ab"] .performance-log .performance-select,
+        html[data-program-theme="ab"] .performance-log .performance-textarea {
+            border-color: rgba(245,158,11,0.22);
+        }
+        html[data-program-theme="ab"] .performance-log .performance-input:focus,
+        html[data-program-theme="ab"] .performance-log .performance-select:focus,
+        html[data-program-theme="ab"] .performance-log .performance-textarea:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245,158,11,0.14);
         }
         html[data-program-theme="ab"] .program-modal-overlay.show .program-modal {
             animation: abSheetIn 0.26s cubic-bezier(0.2,0.8,0.2,1);
@@ -2323,7 +2367,7 @@ function renderPerformanceLog(dayKey, exIdx, exercise) {
             (entry.id ? activePerformanceEdit.entryId === entry.id : activePerformanceEdit.entryIndex === storageIndex);
         if (isEditing) {
             return `
-                <div class="performance-entry is-editing">
+                <div class="performance-entry is-editing" role="listitem">
                     ${performanceFieldsHtml(editPrefix, entry)}
                     <div class="journal-edit-actions">
                         <button type="button" class="journal-edit-cancel" onclick="cancelPerformanceEdit()">ביטול</button>
@@ -2341,7 +2385,7 @@ function renderPerformanceLog(dayKey, exIdx, exercise) {
             : '';
         const feeling = performanceFeeling(entry);
         return `
-            <div class="performance-entry">
+            <div class="performance-entry" role="listitem">
                 <div class="performance-entry-main">
                     <div class="performance-entry-meta">
                         <span class="performance-entry-date">${escapeHtmlChat(formatJournalDate(entry.date))}</span>
@@ -2356,17 +2400,26 @@ function renderPerformanceLog(dayKey, exIdx, exercise) {
                             onclick="deletePerformanceEntry('${dayKey}', ${exIdx}, ${storageIndex})" title="מחק רשומה" aria-label="מחק רשומת ביצוע">✕</button>
                 </div>
             </div>`;
-    }).join('') : '<div class="performance-empty">עדיין אין ביצועים מתועדים לתרגיל הזה.</div>';
+    }).join('') : '<div class="performance-empty" role="status">עדיין אין ביצועים מתועדים לתרגיל הזה.</div>';
 
     return `
-        <section class="performance-log" aria-label="יומן ביצועים">
-            <div class="performance-log-header">
-                <div class="performance-log-title">
-                    <span aria-hidden="true">◷</span>
-                    יומן ביצועים
+        <section class="performance-log" aria-labelledby="${formPrefix}-title">
+            <header class="performance-log-header">
+                <div class="performance-log-heading">
+                    <span class="performance-log-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 5h6"></path><path d="M9 9h6"></path><path d="M9 13h4"></path>
+                            <path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"></path>
+                        </svg>
+                    </span>
+                    <div class="performance-log-copy">
+                        <h3 class="performance-log-title" id="${formPrefix}-title">תיעוד ביצועים</h3>
+                        <p class="performance-log-subtitle">משקל, חזרות והרגשה בכל אימון</p>
+                    </div>
                 </div>
                 <span class="performance-log-count">${performanceCountText(entries.length)}</span>
-            </div>
+            </header>
             <div class="performance-add-launch" id="${formPrefix}-launcher">
                 <button type="button" class="journal-add-btn performance-add-toggle" id="${formPrefix}-open"
                         aria-expanded="false" aria-controls="${formPrefix}-form"
@@ -2382,7 +2435,7 @@ function renderPerformanceLog(dayKey, exIdx, exercise) {
                     <button type="button" class="journal-add-btn" onclick="addPerformanceEntry('${dayKey}', ${exIdx}, '${formPrefix}')">שמור ביצוע</button>
                 </div>
             </div>
-            <div class="performance-entries">${entriesHtml}</div>
+            <div class="performance-entries"${entries.length ? ' role="list"' : ''}>${entriesHtml}</div>
         </section>`;
 }
 
